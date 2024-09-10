@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: time-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: time-api
+  template:
+    metadata:
+      labels:
+        app: time-api
+    spec:
+      containers:
+      - name: time-api
+        image: victorthegreat7/time-api:latest
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi

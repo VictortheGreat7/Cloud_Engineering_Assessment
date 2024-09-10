@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: time-api-loadtest
+spec:
+  template:
+    metadata:
+      name: time-api-loadtest
+    spec:
+      containers:
+      - name: loadtest
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          for i in $(seq 1 1000); do
+            wget -q -O- http://time-api-service/time
+            sleep 0.1
+          done
+      restartPolicy: Never
+  backoffLimit: 4
