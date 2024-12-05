@@ -135,29 +135,42 @@ resource "kubernetes_ingress_v1" "time_api" {
   depends_on = [kubernetes_service.time_api, module.cert_manager]
 }
 
-# # Load Test Job
-# resource "kubernetes_job" "time_api_loadtest" {
-#   metadata {
-#     name = "time-api-loadtest"
-#   }
+# Load Test Job
+resource "kubernetes_job" "time_api_loadtest" {
+  metadata {
+    name = "time-api-loadtest"
+  }
 
-#   spec {
-#     template {
-#       metadata {
-#         name = "time-api-loadtest"
-#       }
-#       spec {
-#         container {
-#           name    = "loadtest"
-#           image   = "busybox"
-#           command = ["/bin/sh", "-c"]
-#           args    = ["for i in $(seq 1 1000); do wget -q -O- http://time-api-service/time; sleep 0.1; done"]
-#         }
-#         restart_policy = "Never"
-#       }
-#     }
-#     backoff_limit = 4
-#   }
+  spec {
+    template {
+      metadata {
+        name = "time-api-loadtest"
+      }
+      spec {
+        container {
+          name    = "loadtest"
+          image   = "busybox"
+          command = ["/bin/sh", "-c"]
+          args    = [<<-EOF
+            for i in $(seq 1 50); do 
+              wget -q -O- http://time-api-service.default.svc.cluster.local:80/time && 
+              echo "Request $i successful"; 
+              sleep 0.1; 
+            done
+          EOF
+          ]
+        }
+        restart_policy = "Never"
+      }
+    }
+    backoff_limit = 4
+    # Add active deadline seconds to ensure the job completes
+    active_deadline_seconds = 300
+  }
 
-#   depends_on = [kubernetes_service.time_api, kubernetes_ingress_v1.time_api]
-# }
+  depends_on = [kubernetes_service.time_api, kubernetes_ingress_v1.time_api]
+
+  timeouts {
+    create = "5m"
+  }
+}
