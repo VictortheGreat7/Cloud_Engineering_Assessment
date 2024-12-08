@@ -17,10 +17,15 @@ variable "cluster_name" {
   default     = "timeapi-cluster"
 }
 
-variable "allowed_source_addresses" {
-  description = "List of authorized ip addresses"
-  type        = list(string)
+variable "workstation_IP" {
+  description = "The IP address of the workstation"
+  type        = string
 }
+
+# variable "allowed_source_addresses" {
+#   description = "List of authorized ip addresses"
+#   type        = list(string)
+# }
 
 variable "my_user_object_id" {
   description = "The object id of the user"

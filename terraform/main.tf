@@ -13,9 +13,9 @@ resource "azurerm_kubernetes_cluster" "capstone" {
   kubernetes_version  = data.azurerm_kubernetes_service_versions.current.default_version
   node_resource_group = "${var.cluster_name}-nrg"
 
-  # api_server_access_profile {
-  #   authorized_ip_ranges = var.allowed_source_addresses
-  # }
+  api_server_access_profile {
+    authorized_ip_ranges = ["${var.workstation_IP}", "${azurerm_public_ip.aks_public_ip.ip_address}/32"]
+  }
 
   default_node_pool {
     name                 = "default"

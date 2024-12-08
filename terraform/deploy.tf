@@ -151,7 +151,7 @@ resource "kubernetes_job" "time_api_loadtest" {
           name    = "loadtest"
           image   = "busybox"
           command = ["/bin/sh", "-c"]
-          args    = [<<-EOF
+          args = [<<-EOF
             for i in $(seq 1 50); do 
               wget -q -O- http://time-api-service.default.svc.cluster.local:80/time && 
               echo "Request $i successful"; 

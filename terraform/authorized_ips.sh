@@ -18,15 +18,15 @@ K8SINGRESS_FILE="../microservices_manifests/ingress.yaml"
 # Check if the curl command was successful
 if [ $? -eq 0 ]; then
   # Read existing content
-  EXISTING_TFVARS_CONTENT=$(grep "allowed_source_addresses = " "$TFVARS_FILE" 2>/dev/null)
+  EXISTING_TFVARS_CONTENT=$(grep "workstation_IP = " "$TFVARS_FILE" 2>/dev/null)
   EXISTING_INGRESS_CONTENT=$(grep "nginx.ingress.kubernetes.io/whitelist-source-range" "$K8SINGRESS_FILE" 2>/dev/null)
   
   if [ -n "$EXISTING_TFVARS_CONTENT" ]; then
     # If the line exists, append the new IP inside the square brackets
-    sudo sed -i "s|\(allowed_source_addresses = \[.*\)\]|\1, \"$IP_ADDRESS\"]|" "$TFVARS_FILE"
+    sudo sed -i "s|\(workstation_IP = \[.*\)\]|\1, \"$IP_ADDRESS\"]|" "$TFVARS_FILE"
   else
     # If the line doesn't exist, append it
-    echo "allowed_source_addresses = [\"$IP_ADDRESS\"]" >> "$TFVARS_FILE"
+    echo "workstation_IP = [\"$IP_ADDRESS\"]" >> "$TFVARS_FILE"
   fi
 
   # if [ -n "$EXISTING_INGRESS_CONTENT" ]; then
