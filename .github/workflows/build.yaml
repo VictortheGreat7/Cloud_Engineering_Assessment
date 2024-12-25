@@ -1,0 +1,175 @@
+name: Deploy Infrastructure and Configure AKS
+
+# on:
+#   push:
+#     branches: # This workflow will only run on pushes to the main branch
+#       - main
+
+on:
+  workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    # This job runs on the latest version of Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    # Login to Azure CLI using the Azure login action
+    - uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # This step is used to check the Azure account that is logged in
+    - name: Azure CLI script
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az account show
+
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Setup Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.9.4
+
+    # Cache Terraform plugins to speed up the workflow
+    - name: Cache Terraform plugins
+      uses: actions/cache@v3
+      with:
+        path: ~/.terraform.d/plugin-cache
+        key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+    # # Setup kubectl
+    # - name: Setup kubectl
+    #   uses: azure/setup-kubectl@v3
+    #   with:
+    #     version: 'v1.30.3'
+
+    # # Install Ansible
+    # - name: Install Ansible
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y software-properties-common
+    #     sudo add-apt-repository --yes --update ppa:ansible/ansible
+    #     sudo apt-get install -y ansible
+
+    # # Install Azure CLI
+    # - name: Install Kubelogin
+    #   run: sudo az aks install-cli
+
+    # Run bash scripts to prepare the backend for Terraform and authorized current IP to access the AKS cluster
+    - name: Run inline bash script
+      run: |
+        chmod +x pre-apply.sh
+        chmod +x authorized_ips.sh
+        ./pre-apply.sh
+        ./authorized_ips.sh
+      working-directory: ./capstone_terraform
+
+    # Initialize Terraform
+    - name: Terraform Init
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init
+      working-directory: ./capstone_terraform
+
+    # Apply Terraform configuration
+    - name: Terraform Apply
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform apply --auto-approve
+      working-directory: ./capstone_terraform
+
+    # # Get AKS Credentials
+    # - name: Get AKS Credentials
+    #   env:
+    #     RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
+    #     CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
+    #   run: |
+    #     az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
+    #   working-directory: ./capstone_terraform
+    
+    # # Authenticate with Kubelogin
+    # - name: Authenticate with Kubelogin
+    #   run: |
+    #     kubelogin convert-kubeconfig -l azurecli
+    
+    # # Apply Nginx Ingress Controller
+    # - name: Apply Nginx Ingress Controller
+    #   run: |
+    #     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+    # # Apply Cert Manager
+    # - name: Apply Cert Manager
+    #   run: |
+    #     kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
+    
+    # # Apply Logging Manifests
+    # - name: Apply Logging Manifests
+    #   run: |
+    #     kubectl apply -f microservices_manifests/manifests-logging
+    
+    # # Apply Sock-Shop Microservices Manifests
+    # - name: Apply Sock-Shop Microservices Manifests
+    #   run: |
+    #     kubectl apply -f microservices_manifests/complete-demo.yaml
+    
+    # # Apply Monitoring Manifests
+    # - name: Apply Monitoring Manifests
+    #   run: |
+    #     kubectl apply -f microservices_manifests/manifests-monitoring
+    
+    # # Apply Alerting Manifests
+    # - name: Apply Alerting Manifests
+    #   run: |
+    #     kubectl apply -f microservices_manifests/manifests-alerting
+    
+    # # Apply Network Policy Manifests
+    # - name: Apply Network Policy Manifests
+    #   run: |
+    #     kubectl apply -f microservices_manifests/manifests-policy
+    
+    # # Apply Issuer and Ingress Manifests
+    # - name: Apply Issuer and Ingress Manifests
+    #   run: |
+    #     kubectl apply -f microservices_manifests/ingress.yaml
+    
+    # # Display all pods in the cluster
+    # - name: Display all pods in all namespaces
+    #   run: |
+    #     kubectl get pods --all-namespaces
+
+    # # Display all ingress resources in the cluster
+    # - name: Display all ingress resources
+    #   run: |
+    #     kubectl get ingress --all-namespaces
+
+    # # Run Ansible playbook to configure the AKS cluster
+    # - name: Run Ansible Playbook
+    #   env:
+    #     ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+    #   run: |
+    #     echo "$ANSIBLE_VAULT_PASSWORD" > vault_password.txt
+    #     ansible-playbook clusterconfig_playbook.yaml --vault-password-file vault_password.txt
+
+    # Clean up
+    - name: Clean up
+      if: always()
+      run: rm -f vault_password.txt

@@ -1,0 +1,61 @@
+name: Destroy Infrastructure
+
+on:
+  workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Log in to Azure using service principal credentials stored in GitHub Secrets
+    - uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Run a simple Azure CLI command to verify login
+    - name: Azure CLI script
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az account show
+
+    # Checkout the repository to access code and configuration files
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Set up Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.9.4
+
+    # Cache Terraform plugins to speed up future runs
+    - name: Cache Terraform plugins
+      uses: actions/cache@v3
+      with:
+        path: ~/.terraform.d/plugin-cache
+        key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+    # Initialize Terraform configuration
+    - name: Terraform Init
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init
+      working-directory: ./capstone_terraform
+
+    # Destory Infrastructure
+    - name: Terraform Destroy
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform destroy --auto-approve
+      working-directory: ./capstone_terraform

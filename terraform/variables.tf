@@ -8,7 +8,7 @@ variable "rg_name" {
 variable "region" {
   description = "The location/region of the resource group"
   type        = string
-  default     = "southafricanorth"
+  default     = "eastus"
 }
 
 variable "cluster_name" {
@@ -17,7 +17,7 @@ variable "cluster_name" {
   default     = "timeapi-cluster"
 }
 
-variable "workstation_IP" {
+variable "workstation_IP_address" {
   description = "The IP address of the workstation"
   type        = string
 }
