@@ -75,7 +75,7 @@ jobs:
         chmod +x authorized_ips.sh
         ./pre-apply.sh
         ./authorized_ips.sh
-      working-directory: ./capstone_terraform
+      working-directory: ./terraform
 
     # Initialize Terraform
     - name: Terraform Init
@@ -85,7 +85,7 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       run: terraform init
-      working-directory: ./capstone_terraform
+      working-directory: ./terraform
 
     # Apply Terraform configuration
     - name: Terraform Apply
@@ -95,7 +95,7 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       run: terraform apply --auto-approve
-      working-directory: ./capstone_terraform
+      working-directory: ./terraform
 
     # # Get AKS Credentials
     # - name: Get AKS Credentials
@@ -104,7 +104,7 @@ jobs:
     #     CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
     #   run: |
     #     az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
-    #   working-directory: ./capstone_terraform
+    #   working-directory: ./terraform
     
     # # Authenticate with Kubelogin
     # - name: Authenticate with Kubelogin
