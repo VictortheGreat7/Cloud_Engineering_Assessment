@@ -3,15 +3,15 @@
 # Exit immediately if a command exits with a non-zero status or an undefined variable is used
 # set -eu
 
-# Terraform variables file
-TFVARS_FILE="terraform.tfvars"
-
 # Check if the curl command exists and install it if it doesn't
 if ! sudo which curl &> /dev/null; then
   echo "Error: curl command not found. Installing curl..."
   sudo apt-get update
   sudo apt-get install -y curl
 fi
+
+# Terraform variables file
+TFVARS_FILE="terraform.tfvars"
 
 # Get the ip address of the current machine
 IP_ADDRESS=$(curl -s ifconfig.me)/32
