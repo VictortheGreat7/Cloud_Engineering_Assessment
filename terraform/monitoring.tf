@@ -1,35 +1,35 @@
-resource "azurerm_monitor_diagnostic_setting" "aks" {
-  name                       = "${azurerm_kubernetes_cluster.capstone.name}-diag"
-  target_resource_id         = azurerm_kubernetes_cluster.capstone.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_workspace.id
+# resource "azurerm_monitor_diagnostic_setting" "aks" {
+#   name                       = "${azurerm_kubernetes_cluster.capstone.name}-diag"
+#   target_resource_id         = azurerm_kubernetes_cluster.capstone.id
+#   log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_workspace.id
 
-  enabled_log {
-    category = "kube-apiserver"
-  }
+#   enabled_log {
+#     category = "kube-apiserver"
+#   }
 
-  enabled_log {
-    category = "kube-controller-manager"
-  }
+#   enabled_log {
+#     category = "kube-controller-manager"
+#   }
 
-  enabled_log {
-    category = "kube-scheduler"
-  }
+#   enabled_log {
+#     category = "kube-scheduler"
+#   }
 
-  enabled_log {
-    category = "kube-audit"
-  }
+#   enabled_log {
+#     category = "kube-audit"
+#   }
 
-  enabled_log {
-    category = "cluster-autoscaler"
-  }
+#   enabled_log {
+#     category = "cluster-autoscaler"
+#   }
 
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-  }
+#   metric {
+#     category = "AllMetrics"
+#     enabled  = true
+#   }
 
-  depends_on = [azurerm_kubernetes_cluster.capstone, azurerm_log_analytics_workspace.aks_workspace]
-}
+#   depends_on = [azurerm_kubernetes_cluster.capstone, azurerm_log_analytics_workspace.aks_workspace]
+# }
 
 resource "azurerm_log_analytics_workspace" "aks_workspace" {
   name                = "${var.rg_name}-log-analytics"
