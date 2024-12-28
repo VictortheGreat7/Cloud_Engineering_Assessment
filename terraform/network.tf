@@ -89,17 +89,17 @@ resource "azurerm_network_security_group" "nsg" {
     destination_address_prefix = "*"
   }
 
-  security_rule {
-    name                       = "deny-all-inbound"
-    priority                   = 4096
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+  # security_rule {
+  #   name                       = "deny-all-inbound"
+  #   priority                   = 4096
+  #   direction                  = "Inbound"
+  #   access                     = "Deny"
+  #   protocol                   = "*"
+  #   source_port_range          = "*"
+  #   destination_port_range     = "*"
+  #   source_address_prefix      = "*"
+  #   destination_address_prefix = "*"
+  # }
 }
 
 resource "azurerm_subnet_network_security_group_association" "example" {
