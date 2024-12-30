@@ -70,7 +70,7 @@ resource "azurerm_kubernetes_cluster" "capstone" {
   #   ]
   # }
 
-  depends_on = [azuread_group.aks_admins, azurerm_subnet_nat_gateway_association.aks_natgw_association, azurerm_nat_gateway_public_ip_association.aks_natgw_association, azurerm_log_analytics_workspace.aks_workspace]
+  depends_on = [azuread_group.aks_admins, azurerm_subnet_nat_gateway_association.aks_natgw_association, azurerm_nat_gateway_public_ip_association.aks_natgw_association, azurerm_log_analytics_workspace.aks_workspace, azurerm_resource_group.aks_rg]
 
   tags = {
     Environment = "test"
