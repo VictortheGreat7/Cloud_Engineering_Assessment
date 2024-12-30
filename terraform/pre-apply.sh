@@ -2,7 +2,7 @@
 
 # Set variables
 RESOURCE_GROUP_NAME=backend-rg
-STORAGE_ACCOUNT_NAME=bunnybackend319
+STORAGE_ACCOUNT_NAME=bunnybackend349
 CONTAINER_NAME=tfstate
 REGION=eastus
 
