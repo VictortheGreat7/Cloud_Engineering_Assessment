@@ -1,5 +1,5 @@
 *.terraform*
-terraform/deployments/** 
+deployments/
 **/terraform.tfvars
 domain.sh
 gh_secret.sh
