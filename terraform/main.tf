@@ -1,4 +1,4 @@
-d # This file contains the terraform code to create the AKS cluster.
+# This file contains the terraform code to create the AKS cluster.
 
 resource "azurerm_resource_group" "aks_rg" {
   name     = var.rg_name
