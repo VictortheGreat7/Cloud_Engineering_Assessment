@@ -24,7 +24,7 @@ resource "kubernetes_config_map" "time_api_config" {
     TIME_ZONE = "UTC"
   }
 
-  depends_on = [azurerm_kubernetes_cluster.capstone, module.cert_manager]
+  depends_on = [azurerm_kubernetes_cluster.capstone]
 }
 
 # Time API Deployment

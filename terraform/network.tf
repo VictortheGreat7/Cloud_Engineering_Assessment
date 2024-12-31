@@ -3,8 +3,6 @@ resource "azurerm_virtual_network" "aks_vnet" {
   address_space       = ["10.240.0.0/16"]
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
-
-  depends_on = [azurerm_resource_group.aks_rg]
 }
 
 resource "azurerm_subnet" "aks_subnet" {
@@ -21,8 +19,6 @@ resource "azurerm_public_ip" "aks_public_ip" {
   resource_group_name = azurerm_resource_group.aks_rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
-
-  depends_on = [azurerm_subnet.aks_subnet]
 }
 
 # NAT Gateway
@@ -36,22 +32,16 @@ resource "azurerm_nat_gateway" "aks_nat_gateway" {
   tags = {
     Environment = "test"
   }
-
-  depends_on = [azurerm_public_ip.aks_public_ip]
 }
 
 resource "azurerm_nat_gateway_public_ip_association" "aks_natgw_association" {
   nat_gateway_id       = azurerm_nat_gateway.aks_nat_gateway.id
   public_ip_address_id = azurerm_public_ip.aks_public_ip.id
-
-  depends_on = [azurerm_subnet_network_security_group_association.example]
 }
 
 resource "azurerm_subnet_nat_gateway_association" "aks_natgw_association" {
   nat_gateway_id = azurerm_nat_gateway.aks_nat_gateway.id
   subnet_id      = azurerm_subnet.aks_subnet.id
-
-  depends_on = [azurerm_nat_gateway_public_ip_association.aks_natgw_association]
 }
 
 output "gateway_ips" {
@@ -110,8 +100,6 @@ resource "azurerm_network_security_group" "nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
-  depends_on = [azurerm_subnet.aks_subnet]
 }
 
 resource "azurerm_subnet_network_security_group_association" "example" {

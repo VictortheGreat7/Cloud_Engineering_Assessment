@@ -1,4 +1,4 @@
-# This file contains the terraform code to create the AKS cluster.
+d # This file contains the terraform code to create the AKS cluster.
 
 resource "azurerm_resource_group" "aks_rg" {
   name     = var.rg_name
@@ -13,9 +13,9 @@ resource "azurerm_kubernetes_cluster" "capstone" {
   kubernetes_version  = data.azurerm_kubernetes_service_versions.current.default_version
   node_resource_group = "${var.cluster_name}-nrg"
 
-  api_server_access_profile {
-    authorized_ip_ranges = ["${var.workstation_IP_address}", "${azurerm_public_ip.aks_public_ip.ip_address}", "105.113.109.154/32"]
-  }
+  # api_server_access_profile {
+  #   authorized_ip_ranges = ["${var.workstation_IP_address}", "${azurerm_public_ip.aks_public_ip.ip_address}/32"]
+  # }
 
   default_node_pool {
     name                 = "default"
@@ -70,7 +70,7 @@ resource "azurerm_kubernetes_cluster" "capstone" {
   #   ]
   # }
 
-  depends_on = [azuread_group.aks_admins, azurerm_subnet_nat_gateway_association.aks_natgw_association, azurerm_nat_gateway_public_ip_association.aks_natgw_association, azurerm_log_analytics_workspace.aks_workspace, azurerm_resource_group.aks_rg]
+  depends_on = [azuread_group.aks_admins, azurerm_subnet_nat_gateway_association.aks_natgw_association, azurerm_nat_gateway_public_ip_association.aks_natgw_association, azurerm_log_analytics_workspace.aks_workspace]
 
   tags = {
     Environment = "test"
