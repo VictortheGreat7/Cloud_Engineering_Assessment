@@ -1,14 +1,15 @@
 module "nginx-controller" {
   source = "terraform-iaac/nginx-controller/helm"
 
+  version = "2.3.0"
+
   depends_on = [azurerm_kubernetes_cluster.capstone]
 }
 
 module "cert_manager" {
   source = "terraform-iaac/cert-manager/kubernetes"
 
-  # chart_version = "1.16.2"
-
+  version              = "2.6.4"
   cluster_issuer_email = "greatvictor.anjorin@gmail.com"
 
   depends_on = [module.nginx-controller]
