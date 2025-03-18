@@ -39,7 +39,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: 1.11.2
+        terraform_version: 1.11.1
 
     # Cache Terraform plugins to speed up the workflow
     - name: Cache Terraform plugins
