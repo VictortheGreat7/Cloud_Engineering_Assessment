@@ -1,8 +1,6 @@
 module "nginx-controller" {
   source = "terraform-iaac/nginx-controller/helm"
 
-  version = "2.3.0"
-
   depends_on = [azurerm_kubernetes_cluster.capstone]
 }
 
