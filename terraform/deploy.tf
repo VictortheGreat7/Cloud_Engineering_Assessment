@@ -7,7 +7,7 @@ module "nginx-controller" {
 module "cert_manager" {
   source = "terraform-iaac/cert-manager/kubernetes"
 
-  chart_version = "1.16.2"
+  # chart_version = "1.16.2"
 
   cluster_issuer_email = "greatvictor.anjorin@gmail.com"
 

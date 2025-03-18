@@ -48,61 +48,61 @@ output "gateway_ips" {
   value = azurerm_public_ip.aks_public_ip
 }
 
-# resource "azurerm_network_security_group" "nsg" {
-#   name                = "${var.cluster_name}-nsg"
-#   resource_group_name = azurerm_resource_group.aks_rg.name
-#   location            = azurerm_resource_group.aks_rg.location
+resource "azurerm_network_security_group" "nsg" {
+  name                = "${var.cluster_name}-nsg"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
 
-#   security_rule {
-#     name                       = "allow-https-access"
-#     priority                   = 100
-#     direction                  = "Inbound"
-#     access                     = "Allow"
-#     protocol                   = "Tcp"
-#     source_port_range          = "*"
-#     destination_port_range     = "443"
-#     source_address_prefix      = "*"
-#     destination_address_prefix = "*"
-#   }
+  security_rule {
+    name                       = "allow-https-access"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 
-#   security_rule {
-#     name                       = "allow-http-access"
-#     priority                   = 101
-#     direction                  = "Inbound"
-#     access                     = "Allow"
-#     protocol                   = "Tcp"
-#     source_port_range          = "*"
-#     destination_port_range     = "80"
-#     source_address_prefix      = "*"
-#     destination_address_prefix = "*"
-#   }
+  security_rule {
+    name                       = "allow-http-access"
+    priority                   = 101
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 
-#   security_rule {
-#     name                       = "allow-vnet-inbound"
-#     priority                   = 102
-#     direction                  = "Inbound"
-#     access                     = "Allow"
-#     protocol                   = "*"
-#     source_port_range          = "*"
-#     destination_port_range     = "*"
-#     source_address_prefix      = "VirtualNetwork"
-#     destination_address_prefix = "*"
-#   }
+  security_rule {
+    name                       = "allow-vnet-inbound"
+    priority                   = 102
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
+  }
 
-#   security_rule {
-#     name                       = "deny-all-inbound"
-#     priority                   = 4096
-#     direction                  = "Inbound"
-#     access                     = "Deny"
-#     protocol                   = "*"
-#     source_port_range          = "*"
-#     destination_port_range     = "*"
-#     source_address_prefix      = "*"
-#     destination_address_prefix = "*"
-#   }
-# }
+  security_rule {
+    name                       = "deny-all-inbound"
+    priority                   = 4096
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
 
-# resource "azurerm_subnet_network_security_group_association" "example" {
-#   subnet_id                 = azurerm_subnet.aks_subnet.id
-#   network_security_group_id = azurerm_network_security_group.nsg.id
-# }
+resource "azurerm_subnet_network_security_group_association" "example" {
+  subnet_id                 = azurerm_subnet.aks_subnet.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
