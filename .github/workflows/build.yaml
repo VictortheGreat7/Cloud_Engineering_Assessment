@@ -73,8 +73,10 @@ jobs:
       run: |
         chmod +x pre-apply.sh
         chmod +x authorized_ips.sh
+        chmod +x runner_ip.sh
         ./pre-apply.sh
         ./runner_ip.sh
+        cat main.tf
       working-directory: ./terraform
 
     # Initialize Terraform
