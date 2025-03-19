@@ -102,7 +102,7 @@ resource "kubernetes_ingress_v1" "time_api" {
   metadata {
     name = "time-api-ingress"
     annotations = {
-      "cert-manager.io/cluster-issuer"           = "cert-manager"
+      "cert-manager.io/cluster-issuer"           = module.cert_manager.cluster_issuer_name
       "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
     }
   }
