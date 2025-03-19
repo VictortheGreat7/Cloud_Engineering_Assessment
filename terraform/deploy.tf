@@ -4,13 +4,20 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.capstone]
 }
 
-module "cert_manager" {
-  source = "terraform-iaac/cert-manager/kubernetes"
-
-  cluster_issuer_email = "greatvictor.anjorin@gmail.com"
-
+module "certmanager" {
+  source     = "dodevops/certmanager/azure"
+  version    = "0.2.0"
   depends_on = [module.nginx-controller]
+
 }
+
+# module "cert_manager" {
+#   source = "terraform-iaac/cert-manager/kubernetes"
+
+#   cluster_issuer_email = "greatvictor.anjorin@gmail.com"
+
+#   depends_on = [module.nginx-controller]
+# }
 
 # Time API ConfigMap
 resource "kubernetes_config_map" "time_api_config" {
