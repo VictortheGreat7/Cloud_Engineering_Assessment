@@ -72,7 +72,10 @@ jobs:
     - name: Run inline bash script
       run: |
         chmod +x pre-apply.sh
+        chmod +x runner_ip.sh
         ./pre-apply.sh
+        ./runner_ip.sh
+        cat main.tf
       working-directory: ./terraform
 
     # Initialize Terraform
