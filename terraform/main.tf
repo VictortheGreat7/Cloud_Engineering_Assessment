@@ -52,9 +52,9 @@ resource "azurerm_kubernetes_cluster" "capstone" {
     network_plugin = "azure"
     # network_policy    = "azure"
     load_balancer_sku = "standard"
-    dns_service_ip    = "172.16.0.10"
-    service_cidr      = "172.16.0.0/16"
-    outbound_type     = "userAssignedNATGateway"
+    # dns_service_ip    = "172.16.0.10"
+    # service_cidr      = "172.16.0.0/16"
+    outbound_type = "userAssignedNATGateway"
     nat_gateway_profile {
       idle_timeout_in_minutes = 4
     }
