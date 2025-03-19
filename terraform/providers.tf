@@ -30,8 +30,6 @@ provider "kubernetes" {
   client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].client_certificate)
   client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].client_key)
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].cluster_ca_certificate)
-
-  depends_on = [azurerm_kubernetes_cluster.capstone]
 }
 
 provider "helm" {
@@ -40,8 +38,6 @@ provider "helm" {
     client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].client_certificate)
     client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].client_key)
     cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].cluster_ca_certificate)
-    depends_on             = [provider.kubernetes]
-
   }
 }
 
@@ -51,5 +47,4 @@ provider "kubectl" {
   client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].client_key)
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw[0].cluster_ca_certificate)
   # load_admin_config_file       = false
-  depends_on = [provider.kubernetes]
 }
