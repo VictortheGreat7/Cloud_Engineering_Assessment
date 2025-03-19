@@ -69,15 +69,11 @@ jobs:
     #   run: sudo az aks install-cli
 
     # Run bash scripts to prepare the backend for Terraform and authorized current IP to access the AKS cluster
-    # - name: Run inline bash script
-    #   run: |
-    #     chmod +x pre-apply.sh
-    #     chmod +x authorized_ips.sh
-    #     chmod +x runner_ip.sh
-    #     ./pre-apply.sh
-    #     ./runner_ip.sh
-    #     cat main.tf
-    #   working-directory: ./terraform
+    - name: Run inline bash script
+      run: |
+        chmod +x pre-apply.sh
+        ./pre-apply.sh
+      working-directory: ./terraform
 
     # Initialize Terraform
     - name: Terraform Init
