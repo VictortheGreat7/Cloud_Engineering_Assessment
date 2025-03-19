@@ -2,15 +2,15 @@
 
 terraform {
   required_providers {
-    azuread = ">= 2.9.0"
-    azurerm = ">= 3.0.0"
+    azuread = ">= 2.9"
+    azurerm = ">= 3"
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 2.36.0"
+      version = ">= 2.36"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = ">= 2.17.0"
+      version = ">= 2.17"
     }
     kubectl = {
       source  = "alekc/kubectl"
@@ -26,25 +26,25 @@ provider "azurerm" {
 }
 
 provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.cluster_ca_certificate)
+  host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.cluster_ca_certificate)
 }
 
 provider "helm" {
   kubernetes {
-    host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.cluster_ca_certificate)
+    host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.host
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.cluster_ca_certificate)
   }
 }
 
 provider "kubectl" {
-  host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.0.cluster_ca_certificate)
+  host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config_raw.cluster_ca_certificate)
   # load_admin_config_file       = false
 }
