@@ -78,6 +78,6 @@ resource "azurerm_kubernetes_cluster" "capstone" {
 }
 
 output "kube_config" {
-  value     = azurerm_kubernetes_cluster.capstone.kube_admin_config
+  value     = azurerm_kubernetes_cluster.capstone.kube_admin_config_raw
   sensitive = true
 }
