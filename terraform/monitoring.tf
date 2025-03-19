@@ -85,7 +85,7 @@ XML
   depends_on = [
     azurerm_application_insights.api,
     kubernetes_ingress_v1.time_api,
-    module.cert_manager
+    module.certmanager
   ]
 }
 
