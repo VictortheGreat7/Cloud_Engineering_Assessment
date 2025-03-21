@@ -4,7 +4,7 @@ on:
   push:
     branches: # This workflow will only run on pushes to the main branch
       - main
-  workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
+  workflow_dispatch:
 
 # on:
 #   workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
