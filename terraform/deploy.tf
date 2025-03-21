@@ -11,14 +11,6 @@ module "certmanager" {
 
 }
 
-# module "cert_manager" {
-#   source = "terraform-iaac/cert-manager/kubernetes"
-
-#   cluster_issuer_email = "greatvictor.anjorin@gmail.com"
-
-#   depends_on = [module.nginx-controller]
-# }
-
 # Time API ConfigMap
 resource "kubernetes_config_map" "time_api_config" {
   metadata {
