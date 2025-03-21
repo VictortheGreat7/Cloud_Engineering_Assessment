@@ -3,7 +3,7 @@ name: Deploy Infrastructure and Configure AKS
 on:
   push:
     branches: # This workflow will only run on pushes to the main branch
-      - main
+      - ma
 
 # on:
 #   workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
@@ -80,40 +80,40 @@ jobs:
       run: terraform apply --auto-approve
       working-directory: ./terraform
 
-    # # Setup kubectl
-    # - name: Setup kubectl
-    #   uses: azure/setup-kubectl@v3
-    #   with:
-    #     version: 'v1.30.3'
+    # Setup kubectl
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.30.3'
 
-    # # Install Kubelogin
-    # - name: Install Kubelogin
-    #   run: sudo az aks install-cli
+    # Install Kubelogin
+    - name: Install Kubelogin
+      run: sudo az aks install-cli
 
-    # # Get AKS Credentials
-    # - name: Get AKS Credentials
-    #   env:
-    #     RESOURCE_GROUP: k8s-cluster-rg
-    #     CLUSTER_NAME: timeapi-cluster
-    #   run: |
-    #     az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
-    #   working-directory: ./terraform
+    # Get AKS Credentials
+    - name: Get AKS Credentials
+      env:
+        RESOURCE_GROUP: k8s-cluster-rg
+        CLUSTER_NAME: timeapi-cluster
+      run: |
+        az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
+      working-directory: ./terraform
     
-    # # Authenticate with Kubelogin
-    # - name: Authenticate with Kubelogin
-    #   run: |
-    #     kubelogin convert-kubeconfig -l azurecli
+    # Authenticate with Kubelogin
+    - name: Authenticate with Kubelogin
+      run: |
+        kubelogin convert-kubeconfig -l azurecli
 
-    # # Run bash script to configure the domain
-    # - name: Run inline bash script
-    #   env:
-    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-    #     DOMAIN: ${{ secrets.DOMAIN }}
-    #   run: |
-    #     chmod +x domain.sh
-    #     ./domain.sh
-    #   working-directory: ./terraform
+    # Run bash script to configure the domain
+    - name: Run inline bash script
+      env:
+        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+        DOMAIN: ${{ secrets.DOMAIN }}
+      run: |
+        chmod +x domain.sh
+        ./domain.sh
+      working-directory: ./terraform
 
     # Clean up
     - name: Clean up
