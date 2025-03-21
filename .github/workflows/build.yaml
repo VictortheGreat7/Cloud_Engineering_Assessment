@@ -1,12 +1,12 @@
 name: Deploy Infrastructure and Configure AKS
 
-# on:
-#   push:
-#     branches: # This workflow will only run on pushes to the main branch
-#       - main
-
 on:
-  workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
+  push:
+    branches: # This workflow will only run on pushes to the main branch
+      - main
+
+# on:
+#   workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
 
 permissions:
   id-token: write
