@@ -93,8 +93,8 @@ jobs:
     # Get AKS Credentials
     - name: Get AKS Credentials
       env:
-        RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
-        CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
+        RESOURCE_GROUP: k8s-cluster-rg
+        CLUSTER_NAME: timeapi-cluster
       run: |
         az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
       working-directory: ./terraform
