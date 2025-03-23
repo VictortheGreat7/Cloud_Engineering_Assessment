@@ -5,7 +5,7 @@ resource "azuread_group" "aks_admins" {
   owners           = [var.my_user_object_id]
   security_enabled = true
 
-  members = [data.azuread_client_config.current.object_id]
+  members = [var.my_user_object_id, data.azuread_client_config.current.object_id]
 }
 
 resource "azurerm_role_assignment" "cluster_role_assignment" {
