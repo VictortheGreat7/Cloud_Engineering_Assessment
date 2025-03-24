@@ -11,6 +11,27 @@ module "certmanager" {
 
 }
 
+resource "kubectl_manifest" "cluster_issuer" {
+  yaml_body = <<-YAML
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+      name: letsencrypt-prod
+    spec:
+      acme:
+        email: "greatvictor.anjorin@gmail.com"
+        server: "https://acme-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef:
+          name: letsencrypt-prod
+        solvers:
+          - http01:
+              ingress:
+                class: nginx
+  YAML
+
+  depends_on = [module.certmanager]
+}
+
 # Time API ConfigMap
 resource "kubernetes_config_map" "time_api_config" {
   metadata {
@@ -133,7 +154,7 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service.time_api, module.certmanager]
+  depends_on = [kubernetes_service.time_api, module.certmanager, resource.kubectl_manifest.cluster_issuer]
 }
 
 # Load Test Job

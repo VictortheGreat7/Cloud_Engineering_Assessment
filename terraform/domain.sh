@@ -6,6 +6,10 @@ set -eu
 # source .env.tmp
 # rm .env.tmp
 
+USERNAME="VictortheGreat"
+TOKEN="a44c00dcf5b1efc0ecdc3ab2884a146cdf0c3c82"
+DOMAIN="mywonder.works"
+
 # DNS record details
 RECORD_TYPE="A"
 HOST="api"
@@ -13,7 +17,7 @@ ANSWER=$(kubectl get svc -n kube-system ingress-nginx-controller -o jsonpath='{.
 TTL="300"
 
 # API endpoint
-API_URL="https://api.dev.name.com/v4/domains/$DOMAIN/records"
+API_URL="https://api.name.com/v4/domains/$DOMAIN/records"
 
 # Add DNS record
 curl -X POST "$API_URL" \
