@@ -6,10 +6,6 @@ set -eu
 # source .env.tmp
 # rm .env.tmp
 
-USERNAME="VictortheGreat"
-TOKEN="a44c00dcf5b1efc0ecdc3ab2884a146cdf0c3c82"
-DOMAIN="mywonder.works"
-
 # DNS record details
 RECORD_TYPE="A"
 HOST="api"
