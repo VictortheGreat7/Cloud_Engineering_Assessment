@@ -96,41 +96,25 @@ resource "kubernetes_service" "time_api" {
   depends_on = [kubernetes_deployment.time_api]
 }
 
-provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config[0].host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config[0].client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config[0].client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config[0].cluster_ca_certificate)
-}
+resource "kubectl_manifest" "cluster_issuer" {
+  yaml_body = <<-YAML
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+      name: certmanager
+    spec:
+      acme:
+        email: "greatvictor.anjorin@gmail.com"
+        server: "https://acme-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef:
+          name: certmanager
+        solvers:
+          - http01:
+              ingress:
+                class: nginx
+  YAML
 
-resource "kubernetes_manifest" "cluster_issuer" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "ClusterIssuer"
-    metadata = {
-      name = "certmanager"
-    }
-    spec = {
-      acme = {
-        email  = "greatvictor.anjorin@gmail.com"
-        server = "https://acme-v02.api.letsencrypt.org/directory"
-        privateKeySecretRef = {
-          name = "certmanager"
-        }
-        solvers = [
-          {
-            http01 = {
-              ingress = {
-                class = "nginx"
-              }
-            }
-          }
-        ]
-      }
-    }
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.capstone, module.certmanager]
+  depends_on = [module.certmanager, azurerm_kubernetes_cluster.capstone]
 }
 
 # Time API Ingress
@@ -170,7 +154,7 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service.time_api, module.certmanager, resource.kubernetes_manifest.cluster_issuer]
+  depends_on = [kubernetes_service.time_api, module.certmanager, resource.kubectl_manifest.cluster_issuer]
 }
 
 # Load Test Job
