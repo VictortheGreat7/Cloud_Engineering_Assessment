@@ -96,6 +96,13 @@ resource "kubernetes_service" "time_api" {
   depends_on = [kubernetes_deployment.time_api]
 }
 
+provider "kubernetes" {
+  host                   = azurerm_kubernetes_cluster.capstone.kube_admin_config[0].host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config[0].client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config[0].client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.capstone.kube_admin_config[0].cluster_ca_certificate)
+}
+
 resource "kubernetes_manifest" "cluster_issuer" {
   manifest = {
     apiVersion = "cert-manager.io/v1"
@@ -123,7 +130,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
     }
   }
 
-  depends_on = [azurerm_kubernetes_cluster.capstone, provider.kubernetes, module.certmanager]
+  depends_on = [azurerm_kubernetes_cluster.capstone, module.certmanager]
 }
 
 # Time API Ingress
