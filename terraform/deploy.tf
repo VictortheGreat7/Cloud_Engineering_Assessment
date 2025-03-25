@@ -96,6 +96,11 @@ resource "kubernetes_service" "time_api" {
   depends_on = [kubernetes_deployment.time_api]
 }
 
+resource "time_sleep" "wait_for_kubernetes" {
+  depends_on      = [module.certmanager.helm_release.cert-manager]
+  create_duration = "30s"
+}
+
 resource "kubectl_manifest" "cluster_issuer" {
   yaml_body = <<-YAML
     apiVersion: cert-manager.io/v1
@@ -114,7 +119,7 @@ resource "kubectl_manifest" "cluster_issuer" {
                 class: nginx
   YAML
 
-  depends_on = [module.certmanager, azurerm_kubernetes_cluster.capstone]
+  depends_on = [time_sleep.wait_for_kubernetes, azurerm_kubernetes_cluster.capstone]
 }
 
 # Time API Ingress
