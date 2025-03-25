@@ -123,7 +123,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
     }
   }
 
-  depends_on = [azurerm_kubernetes_cluster.capstone, module.certmanager]
+  depends_on = [azurerm_kubernetes_cluster.capstone, provider.kubernetes, module.certmanager]
 }
 
 # Time API Ingress
