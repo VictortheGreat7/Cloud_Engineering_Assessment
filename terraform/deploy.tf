@@ -8,7 +8,7 @@ module "certmanager" {
   source     = "dodevops/certmanager/azure"
   version    = "0.2.0"
 
-  cluster_issuers_yaml = <<-YAML
+  cluster-issuers-yaml = <<-YAML
     apiVersion: cert-manager.io/v1
     kind: ClusterIssuer
     metadata:
