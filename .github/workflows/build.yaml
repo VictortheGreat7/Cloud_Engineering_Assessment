@@ -1,13 +1,11 @@
 name: Deploy Infrastructure and Configure AKS
 
+# This workflow will run on pushes to the main branch and manual triggers
 on:
   push:
-    branches: # This workflow will only run on pushes to the main branch
+    branches:
       - main
   workflow_dispatch:
-
-# on:
-#   workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
 
 permissions:
   id-token: write
@@ -15,7 +13,6 @@ permissions:
 
 jobs:
   deploy:
-    # This job runs on the latest version of Ubuntu
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +21,7 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # This step is used to check the Azure account that is logged in
+    # This step checks that the Azure account is logged in
     - name: Azure CLI script
       uses: azure/cli@v2
       with:
@@ -42,24 +39,26 @@ jobs:
       with:
         terraform_version: 1.11.2
 
-    # Cache Terraform plugins to speed up the workflow
-    - name: Cache Terraform plugins
-      uses: actions/cache@v3
-      with:
-        path: ~/.terraform.d/plugin-cache
-        key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
-        restore-keys: |
-          ${{ runner.os }}-terraform-
-
-    # Run bash scripts to prepare the backend for Terraform and authorized current IP to access the AKS cluster
+    # Run bash scripts to prepare the backend for Terraform and authorize GitHub Actions runner IP to access the AKS cluster
     - name: Run inline bash script
       run: |
         chmod +x pre-apply.sh
         chmod +x runner_ip.sh
         ./pre-apply.sh
         ./runner_ip.sh
-        cat main.tf
       working-directory: ./terraform
+
+          # Cache Terraform plugins and modules
+    - name: Cache Terraform Plugins and Modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.terraform.d/plugins
+          .terraform/providers
+        key: |
+          terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+        restore-keys: |
+          terraform-${{ runner.os }}-
 
     # Initialize Terraform
     - name: Terraform Init
@@ -81,17 +80,17 @@ jobs:
       run: terraform apply --auto-approve
       working-directory: ./terraform
 
-    # Setup kubectl
+    # Setup kubectl for domain.sh script
     - name: Setup kubectl
       uses: azure/setup-kubectl@v3
       with:
         version: 'v1.30.3'
 
-    # Install Kubelogin
+    # Install Kubelogin for domain.sh script
     - name: Install Kubelogin
       run: sudo az aks install-cli
 
-    # Get AKS Credentials
+    # Get AKS Credentials for domain.sh script
     - name: Get AKS Credentials
       env:
         RESOURCE_GROUP: k8s-cluster-rg
