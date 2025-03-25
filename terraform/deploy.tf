@@ -114,10 +114,10 @@ resource "kubernetes_service" "time_api" {
   depends_on = [kubernetes_deployment.time_api]
 }
 
-resource "time_sleep" "wait_for_kubernetes" {
-  depends_on      = [module.certmanager.helm_release.cert-manager]
-  create_duration = "30s"
-}
+# resource "time_sleep" "wait_for_kubernetes" {
+#   depends_on      = [module.certmanager.helm_release.cert-manager]
+#   create_duration = "30s"
+# }
 
 # resource "kubectl_manifest" "cluster_issuer" {
 #   yaml_body = <<-YAML
