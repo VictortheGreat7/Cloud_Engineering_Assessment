@@ -9,20 +9,18 @@ module "certmanager" {
   version    = "0.2.0"
 
   cluster-issuers-yaml = <<-YAML
-    apiVersion: cert-manager.io/v1
-    kind: ClusterIssuer
-    metadata:
-      name: certmanager
-    spec:
-      acme:
-        email: "greatvictor.anjorin@gmail.com"
-        server: "https://acme-v02.api.letsencrypt.org/directory"
-        privateKeySecretRef:
-          name: certmanager
-        solvers:
-          - http01:
-              ingress:
-                class: nginx
+  clusterIssuers:
+    - name: certmanager
+      spec:
+        acme:
+          email: "greatvictor.anjorin@gmail.com"
+          server: "https://acme-v02.api.letsencrypt.org/directory"
+          privateKeySecretRef:
+            name: certmanager
+          solvers:
+            - http01:
+                ingress:
+                  class: nginx
   YAML
 
   depends_on = [module.nginx-controller]
