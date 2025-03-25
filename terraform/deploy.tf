@@ -7,6 +7,24 @@ module "nginx-controller" {
 module "certmanager" {
   source     = "dodevops/certmanager/azure"
   version    = "0.2.0"
+
+  cluster_issuers_yaml = <<-YAML
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+      name: certmanager
+    spec:
+      acme:
+        email: "greatvictor.anjorin@gmail.com"
+        server: "https://acme-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef:
+          name: certmanager
+        solvers:
+          - http01:
+              ingress:
+                class: nginx
+  YAML
+
   depends_on = [module.nginx-controller]
 
 }
@@ -101,26 +119,26 @@ resource "time_sleep" "wait_for_kubernetes" {
   create_duration = "30s"
 }
 
-resource "kubectl_manifest" "cluster_issuer" {
-  yaml_body = <<-YAML
-    apiVersion: cert-manager.io/v1
-    kind: ClusterIssuer
-    metadata:
-      name: certmanager
-    spec:
-      acme:
-        email: "greatvictor.anjorin@gmail.com"
-        server: "https://acme-v02.api.letsencrypt.org/directory"
-        privateKeySecretRef:
-          name: certmanager
-        solvers:
-          - http01:
-              ingress:
-                class: nginx
-  YAML
+# resource "kubectl_manifest" "cluster_issuer" {
+#   yaml_body = <<-YAML
+#     apiVersion: cert-manager.io/v1
+#     kind: ClusterIssuer
+#     metadata:
+#       name: certmanager
+#     spec:
+#       acme:
+#         email: "greatvictor.anjorin@gmail.com"
+#         server: "https://acme-v02.api.letsencrypt.org/directory"
+#         privateKeySecretRef:
+#           name: certmanager
+#         solvers:
+#           - http01:
+#               ingress:
+#                 class: nginx
+#   YAML
 
-  depends_on = [time_sleep.wait_for_kubernetes, azurerm_kubernetes_cluster.capstone]
-}
+#   depends_on = [time_sleep.wait_for_kubernetes, azurerm_kubernetes_cluster.capstone]
+# }
 
 # Time API Ingress
 resource "kubernetes_ingress_v1" "time_api" {
