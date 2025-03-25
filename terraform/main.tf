@@ -49,7 +49,7 @@ resource "azurerm_kubernetes_cluster" "capstone" {
 
 
   network_profile {
-    network_plugin = "azure"
+    network_plugin    = "azure"
     network_policy    = "azure"
     load_balancer_sku = "standard"
     dns_service_ip    = "172.16.0.10"

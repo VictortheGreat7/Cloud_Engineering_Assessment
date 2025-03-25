@@ -105,8 +105,8 @@ resource "kubernetes_manifest" "cluster_issuer" {
     }
     spec = {
       acme = {
-        email                 = "greatvictor.anjorin@gmail.com"
-        server                = "https://acme-v02.api.letsencrypt.org/directory"
+        email  = "greatvictor.anjorin@gmail.com"
+        server = "https://acme-v02.api.letsencrypt.org/directory"
         privateKeySecretRef = {
           name = "certmanager"
         }
@@ -123,7 +123,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
     }
   }
 
-  depends_on = [module.certmanager]
+  depends_on = [azurerm_kubernetes_cluster.capstone, module.certmanager]
 }
 
 # Time API Ingress
