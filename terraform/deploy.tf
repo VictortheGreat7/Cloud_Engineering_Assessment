@@ -163,7 +163,7 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service.time_api, module.certmanager, resource.kubectl_manifest.cluster_issuer]
+  depends_on = [kubernetes_service.time_api, module.certmanager, resource.kubernetes_manifest.cluster_issuer]
 }
 
 # Load Test Job
