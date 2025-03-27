@@ -9,10 +9,11 @@ module "nginx-controller" {
 }
 
 resource "helm_release" "cert_manager" {
-  name             = "certmanager"
+  name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
   chart            = "cert-manager"
-  create_namespace = false
+  namespace        = "cert-manager"
+  create_namespace = true
   version          = "v1.16.0"
 
   set {
@@ -43,7 +44,7 @@ module "certmanager" {
                   class: nginx
   YAML
 
-  depends_on = [module.nginx-controller]
+  depends_on = [module.nginx-controller, helm_release.cert_manager]
 }
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
