@@ -4,7 +4,7 @@ resource "random_pet" "time_api" {
 }
 
 resource "azurerm_resource_group" "time_api_rg" {
-  name     = "rg-${random_pet.time_api.id}-time_api"
+  name     = "rg-${random_pet.time_api.id}-time-api"
   location = var.region
 }
 
