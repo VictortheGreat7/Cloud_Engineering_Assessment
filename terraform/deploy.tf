@@ -15,8 +15,6 @@ module "certmanager" {
   source  = "dodevops/certmanager/azure"
   version = "0.2.0"
 
-  installCRDs = true
-
   cluster-issuers-yaml = <<-YAML
   clusterIssuers:
     - name: certmanager
