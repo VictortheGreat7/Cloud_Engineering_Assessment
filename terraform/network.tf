@@ -2,7 +2,7 @@
 
 # Virtual Network 
 resource "azurerm_virtual_network" "time_api_vnet" {
-  name                = "${var.cluster_name}-vnet"
+  name                = "vnet-${azurerm_resource_group.time_api_rg.name}"
   address_space       = ["10.240.0.0/16"]
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
@@ -10,7 +10,7 @@ resource "azurerm_virtual_network" "time_api_vnet" {
 
 # AKS Cluster Subnet
 resource "azurerm_subnet" "time_api_subnet" {
-  name                 = "${var.cluster_name}-subnet"
+  name                 = "subnet-${azurerm_resource_group.time_api_rg.name}"
   resource_group_name  = azurerm_resource_group.time_api_rg.name
   virtual_network_name = azurerm_virtual_network.time_api_vnet.name
   address_prefixes     = ["10.240.0.0/22"]
@@ -18,7 +18,7 @@ resource "azurerm_subnet" "time_api_subnet" {
 
 # AKS Cluster Subnet Network Security Group
 resource "azurerm_network_security_group" "time_api_nsg" {
-  name                = "${var.cluster_name}-nsg"
+  name                = "nsg-${azurerm_resource_group.time_api_rg.name}"
   resource_group_name = azurerm_resource_group.time_api_rg.name
   location            = azurerm_resource_group.time_api_rg.location
 
@@ -78,7 +78,7 @@ resource "azurerm_subnet_network_security_group_association" "time_api_nsg_subne
 
 # NAT Gateway
 resource "azurerm_nat_gateway" "time_api_nat_gateway" {
-  name                    = "${var.cluster_name}-natgw"
+  name                    = "natgw-${azurerm_resource_group.time_api_rg.name}"
   location                = azurerm_resource_group.time_api_rg.location
   resource_group_name     = azurerm_resource_group.time_api_rg.name
   sku_name                = "Standard"
@@ -91,7 +91,7 @@ resource "azurerm_nat_gateway" "time_api_nat_gateway" {
 
 # NAT Gateway Public IP
 resource "azurerm_public_ip" "time_api_public_ip" {
-  name                = "${var.cluster_name}-public-ip"
+  name                = "public-ip-${azurerm_resource_group.time_api_rg.name}"
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
   allocation_method   = "Static"
