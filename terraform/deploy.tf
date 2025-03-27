@@ -1,9 +1,16 @@
+# This file is responsible for deploying the time API application to the Azure Kubernetes Service (AKS) cluster.
+
+# This module deploys the NGINX Ingress Controller to the Kubernetes cluster.
+# It provides a way to expose HTTP and HTTPS routes from outside the cluster to the appropriate service based on the defined rules.
 module "nginx-controller" {
   source = "terraform-iaac/nginx-controller/helm"
 
-  depends_on = [azurerm_kubernetes_cluster.capstone]
+  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
+# This module deploys the cert-manager to the Kubernetes cluster.
+# Cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
+# It can be used to obtain certificates from Let's Encrypt, HashiCorp Vault, and other certificate authorities.
 module "certmanager" {
   source  = "dodevops/certmanager/azure"
   version = "0.2.0"
@@ -26,7 +33,10 @@ module "certmanager" {
   depends_on = [module.nginx-controller]
 }
 
-# Time API ConfigMap
+# This resource creates a ConfigMap in the Kubernetes cluster.
+# A ConfigMap is used to store non-confidential data in key-value pairs.
+# ConfigMaps are used to decouple environment-specific configuration from the container images, allowing for more flexible deployments.
+# The time zone is set to UTC, but this can be changed as needed.
 resource "kubernetes_config_map" "time_api_config" {
   metadata {
     name = "time-api-config"
@@ -36,10 +46,10 @@ resource "kubernetes_config_map" "time_api_config" {
     TIME_ZONE = "UTC"
   }
 
-  depends_on = [azurerm_kubernetes_cluster.capstone]
+  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-# Time API Deployment
+# This deploys the time API application to the Kubernetes cluster
 resource "kubernetes_deployment" "time_api" {
   metadata {
     name = "time-api"
@@ -88,7 +98,8 @@ resource "kubernetes_deployment" "time_api" {
   depends_on = [kubernetes_config_map.time_api_config]
 }
 
-# Time API Service
+# This creates a service for the time API deployment, allowing it to be accessed within the cluster.
+# The service is of type ClusterIP, which means it will only be accessible from within the cluster.
 resource "kubernetes_service" "time_api" {
   metadata {
     name = "time-api-service"
@@ -111,7 +122,7 @@ resource "kubernetes_service" "time_api" {
   depends_on = [kubernetes_deployment.time_api]
 }
 
-# Time API Ingress
+# This gives the time API service an external IP address and makes it accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
   metadata {
     name = "time-api-ingress"
@@ -151,7 +162,8 @@ resource "kubernetes_ingress_v1" "time_api" {
   depends_on = [kubernetes_service.time_api, module.certmanager]
 }
 
-# Load Test Job
+# This tests the time API by sending 50 requests to the service and checking if the response is successful.
+# It's a simple load test to ensure the service is up and running.
 resource "kubernetes_job" "time_api_loadtest" {
   metadata {
     name = "time-api-loadtest"
