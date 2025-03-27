@@ -8,6 +8,19 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
+resource "helm_release" "cert_manager" {
+  name             = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
+  create_namespace = false
+  version          = "v1.16.0"
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+}
+
 # This module deploys the cert-manager to the Kubernetes cluster.
 # Cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
 # It can be used to obtain certificates from Let's Encrypt, HashiCorp Vault, and other certificate authorities.
