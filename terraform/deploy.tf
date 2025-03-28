@@ -25,27 +25,25 @@ resource "helm_release" "cert_manager" {
 # This module deploys the cert-manager to the Kubernetes cluster.
 # Cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
 # It can be used to obtain certificates from Let's Encrypt, HashiCorp Vault, and other certificate authorities.
-module "certmanager" {
-  source  = "dodevops/certmanager/azure"
-  version = "0.2.0"
-
-  cluster-issuers-yaml = <<-YAML
-  clusterIssuers:
-    - name: certmanager
-      spec:
-        acme:
-          email: "greatvictor.anjorin@gmail.com"
-          server: "https://acme-v02.api.letsencrypt.org/directory"
-          privateKeySecretRef:
-            name: certmanager
-          solvers:
-            - http01:
-                ingress:
-                  class: nginx
-  YAML
-
-  depends_on = [module.nginx-controller, helm_release.cert_manager]
+resource "kubectl_manifest" "certmanager_clusterissuer" {
+  yaml_body = <<YAML
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: certmanager
+spec:
+  acme:
+    email: "greatvictor.anjorin@gmail.com"
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    privateKeySecretRef:
+      name: certmanager
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+YAML
 }
+
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
 # A ConfigMap is used to store non-confidential data in key-value pairs.
