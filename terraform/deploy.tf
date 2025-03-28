@@ -10,7 +10,7 @@ module "nginx-controller" {
 
 module "cert_manager" {
   source  = "terraform-iaac/cert-manager/kubernetes"
-  version = ">=2.10.0"
+  version = ">=2.6.4"
 
   namespace        = "cert-manager"
   email            = "greatvictor.anjorin@gmail.com"
