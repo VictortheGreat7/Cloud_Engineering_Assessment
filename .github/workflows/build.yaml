@@ -93,8 +93,11 @@ jobs:
     # Get AKS Credentials for domain.sh script
     - name: Get AKS Credentials
       run: |
-        chmod +x aks_cred.sh
-        ./aks_cred.sh
+        RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk '{print $1}')
+        CLUSTER_NAME=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk '{print $1}')
+        echo "Resource Group: $RESOURCE_GROUP"
+        echo "Cluster Name: $CLUSTER_NAME"
+        az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
       working-directory: ./terraform
     
     # Authenticate with Kubelogin
