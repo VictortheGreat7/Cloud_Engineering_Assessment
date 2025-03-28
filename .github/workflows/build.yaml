@@ -58,17 +58,17 @@ jobs:
       run: terraform init
       working-directory: ./terraform
 
-    # Cache Terraform plugins and modules
-    - name: Cache Terraform Plugins and Modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.terraform.d/plugins
-          .terraform/providers
-        key: |
-          terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
-        restore-keys: |
-          terraform-${{ runner.os }}-
+    # # Cache Terraform plugins and modules
+    # - name: Cache Terraform Plugins and Modules
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: |
+    #       ~/.terraform.d/plugins
+    #       .terraform/providers
+    #     key: |
+    #       terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+    #     restore-keys: |
+    #       terraform-${{ runner.os }}-
 
     # Apply Terraform configuration
     - name: Terraform Apply
