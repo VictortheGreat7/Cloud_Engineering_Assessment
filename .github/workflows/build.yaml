@@ -94,7 +94,7 @@ jobs:
     - name: Get AKS Credentials
       run: |
         RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -v '^0$' | grep -v '^$' | awk -F': ' '{print $2}')
-        CLUSTER_NAME=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -v '^0$' | grep -v '^$' | awk -F': ' '{print $2}')
+        RESOURCE_GROUP=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -v '^0$' | grep -v '^$' | awk -F': ' '{print $2}')
         echo "Resource Group: $RESOURCE_GROUP"
         echo "Cluster Name: $CLUSTER_NAME"
         az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
