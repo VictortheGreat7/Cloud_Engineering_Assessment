@@ -17,36 +17,32 @@ resource "helm_release" "cert_manager" {
   version          = "v1.16.0"
 
   set {
-    name  = "installCRDs"
+    name  = "crds.enabled"
     value = "true"
-  }
-
-  set {
-    name  = "clusterIssuer.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "clusterIssuer.email"
-    value = "greatvictor.anjorin@gmail.com"
-  }
-
-  set {
-    name  = "clusterIssuer.server"
-    value = "https://acme-v02.api.letsencrypt.org/directory"
-  }
-
-  set {
-    name  = "clusterIssuer.privateKeySecretRef.name"
-    value = "certmanager"
-  }
-
-  set {
-    name  = "clusterIssuer.solvers[0].http01.ingress.class"
-    value = "nginx"
   }
 
   depends_on = [module.nginx-controller]
+}
+
+resource "kubectl_manifest" "certmanager_clusterissuer" {
+  yaml_body = <<YAML
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: certmanager
+spec:
+  acme:
+    email: "greatvictor.anjorin@gmail.com"
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    privateKeySecretRef:
+      name: certmanager
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+YAML
+
+  depends_on = [helm_release.cert_manager]
 }
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
