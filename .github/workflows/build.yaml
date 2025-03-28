@@ -90,15 +90,10 @@ jobs:
     - name: Install Kubelogin
       run: sudo az aks install-cli
 
-    - name: Install jq
-      run: sudo apt-get update && sudo apt-get install -y jq
-
-    - name: Set AKS Variables
+    - name: Set environment variables
       run: |
-        CLUSTER_NAME=$(terraform output -json aks_cluster_name | jq -r '.')
-        RESOURCE_GROUP=$(terraform output -json aks_resource_group | jq -r '.')
-        echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
-        echo "RESOURCE_GROUP=$RESOURCE_GROUP" >> $GITHUB_ENV
+        echo "CLUSTER_NAME=$(terraform output -raw aks_cluster_name | tr -d '\n')" >> $GITHUB_ENV
+        echo "RESOURCE_GROUP=$(terraform output -raw aks_resource_group | tr -d '\n')" >> $GITHUB_ENV
       working-directory: ./terraform
 
     # Get AKS Credentials for domain.sh script
