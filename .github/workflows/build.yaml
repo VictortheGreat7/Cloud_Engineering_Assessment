@@ -92,9 +92,13 @@ jobs:
 
     - name: Set environment variables
       run: |
-        echo "CLUSTER_NAME=$(terraform output -raw aks_cluster_name | tr -d '\n')" >> $GITHUB_ENV
-        echo "RESOURCE_GROUP=$(terraform output -raw aks_resource_group | tr -d '\n')" >> $GITHUB_ENV
+        CLUSTER_NAME=$(terraform output -raw aks_cluster_name 2>/dev/null | tr -d '\n' | tr -d '\r')
+        RESOURCE_GROUP=$(terraform output -raw aks_resource_group 2>/dev/null | tr -d '\n' | tr -d '\r')
+        
+        echo "CLUSTER_NAME=${CLUSTER_NAME}" >> $GITHUB_ENV
+        echo "RESOURCE_GROUP=${RESOURCE_GROUP}" >> $GITHUB_ENV
       working-directory: ./terraform
+
 
     # Get AKS Credentials for domain.sh script
     - name: Get AKS Credentials
