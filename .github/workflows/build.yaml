@@ -48,7 +48,17 @@ jobs:
         ./runner_ip.sh
       working-directory: ./terraform
 
-          # Cache Terraform plugins and modules
+    # Initialize Terraform
+    - name: Terraform Init
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init
+      working-directory: ./terraform
+
+    # Cache Terraform plugins and modules
     - name: Cache Terraform Plugins and Modules
       uses: actions/cache@v4
       with:
@@ -59,16 +69,6 @@ jobs:
           terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
         restore-keys: |
           terraform-${{ runner.os }}-
-
-    # Initialize Terraform
-    - name: Terraform Init
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: terraform init
-      working-directory: ./terraform
 
     # Apply Terraform configuration
     - name: Terraform Apply

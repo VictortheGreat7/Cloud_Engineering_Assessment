@@ -45,6 +45,8 @@ resource "helm_release" "cert_manager" {
     name  = "clusterIssuer.solvers[0].http01.ingress.class"
     value = "nginx"
   }
+
+  depends_on = [module.nginx-controller]
 }
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
@@ -173,7 +175,7 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service.time_api, kubectl_manifest.certmanager_clusterissuer]
+  depends_on = [kubernetes_service.time_api, helm_release.cert_manager]
 }
 
 # This tests the time API by sending 50 requests to the service and checking if the response is successful.
