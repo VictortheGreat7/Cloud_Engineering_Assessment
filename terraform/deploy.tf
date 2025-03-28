@@ -12,11 +12,19 @@ module "cert_manager" {
   source  = "terraform-iaac/cert-manager/kubernetes"
   version = ">=2.6.4"
 
-  namespace        = "cert-manager"
-  email            = "greatvictor.anjorin@gmail.com"
-  server           = "https://acme-v02.api.letsencrypt.org/directory"
-  ingress_class    = "nginx"
-  create_namespace = true
+  create_namespace      = true
+  cluster_issuer_name   = "certmanager"
+  cluster_issuer_email  = "greatvictor.anjorin@gmail.com"
+  cluster_issuer_server = "https://acme-v02.api.letsencrypt.org/directory"
+  solvers = [
+    {
+      http01 = {
+        ingress = {
+          class = "nginx"
+        }
+      }
+    }
+  ]
 
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster, module.nginx-controller]
 }
