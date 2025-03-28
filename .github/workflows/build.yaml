@@ -90,11 +90,14 @@ jobs:
     - name: Install Kubelogin
       run: sudo az aks install-cli
 
+    - name: Set AKS Variables
+      run: |
+        echo "CLUSTER_NAME=$(terraform output -raw aks_cluster_name)" >> $GITHUB_ENV
+        echo "RESOURCE_GROUP=$(terraform output -raw aks_resource_group)" >> $GITHUB_ENV
+      working-directory: ./terraform
+
     # Get AKS Credentials for domain.sh script
     - name: Get AKS Credentials
-      env:
-        RESOURCE_GROUP: k8s-cluster-rg
-        CLUSTER_NAME: timeapi-cluster
       run: |
         az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
       working-directory: ./terraform
