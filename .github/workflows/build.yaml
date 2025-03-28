@@ -37,7 +37,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: 1.11.2
+        terraform_version: 1.11.3
 
     # Run bash scripts to prepare the backend for Terraform and authorize GitHub Actions runner IP to access the AKS cluster
     - name: Run inline bash script
@@ -57,18 +57,6 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       run: terraform init
       working-directory: ./terraform
-
-    # # Cache Terraform plugins and modules
-    # - name: Cache Terraform Plugins and Modules
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: |
-    #       ~/.terraform.d/plugins
-    #       .terraform/providers
-    #     key: |
-    #       terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
-    #     restore-keys: |
-    #       terraform-${{ runner.os }}-
 
     # Apply Terraform configuration
     - name: Terraform Apply
@@ -95,8 +83,6 @@ jobs:
       run: |
         RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
         CLUSTER_NAME=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
-        echo "Resource Group: $RESOURCE_GROUP"
-        echo "Cluster Name: $CLUSTER_NAME"
         az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
       working-directory: ./terraform
     

@@ -29,19 +29,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: 1.11.2
-
-    # # Cache Terraform plugins to speed up future runs
-    # - name: Cache Terraform Plugins and Modules
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: |
-    #       ~/.terraform.d/plugins
-    #       .terraform/providers
-    #     key: |
-    #       terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
-    #     restore-keys: |
-    #       terraform-${{ runner.os }}-
+        terraform_version: 1.11.3
 
     # Initialize Terraform configuration
     - name: Terraform Init
