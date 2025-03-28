@@ -9,26 +9,48 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-module "cert_manager" {
-  source  = "terraform-iaac/cert-manager/kubernetes"
-  version = ">=2.6.4"
+# module "cert_manager" {
+#   source  = "terraform-iaac/cert-manager/kubernetes"
+#   version = ">=2.6.4"
 
-  create_namespace      = true
-  cluster_issuer_name   = "certmanager"
-  cluster_issuer_email  = "greatvictor.anjorin@gmail.com"
-  cluster_issuer_server = "https://acme-v02.api.letsencrypt.org/directory"
-  solvers = [
-    {
-      http01 = {
-        ingress = {
-          class = "nginx"
-        }
-      }
-    }
-  ]
+#   create_namespace      = true
+#   cluster_issuer_name   = "certmanager"
+#   cluster_issuer_email  = "greatvictor.anjorin@gmail.com"
+#   cluster_issuer_server = "https://acme-v02.api.letsencrypt.org/directory"
+#   solvers = [
+#     {
+#       http01 = {
+#         ingress = {
+#           class = "nginx"
+#         }
+#       }
+#     }
+#   ]
 
-  depends_on = [azurerm_kubernetes_cluster.time_api_cluster, module.nginx-controller]
-}
+#   depends_on = [azurerm_kubernetes_cluster.time_api_cluster, module.nginx-controller]
+# }
+
+module "certmanager" {
+   source     = "dodevops/certmanager/azure"
+   version    = "0.2.0"
+ 
+   cluster-issuers-yaml = <<-YAML
+   clusterIssuers:
+     - name: certmanager
+       spec:
+         acme:
+           email: "greatvictor.anjorin@gmail.com"
+           server: "https://acme-v02.api.letsencrypt.org/directory"
+           privateKeySecretRef:
+             name: certmanager
+           solvers:
+             - http01:
+                 ingress:
+                   class: nginx
+   YAML
+ 
+   depends_on = [module.nginx-controller]
+ }
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
 # A ConfigMap is used to store non-confidential data in key-value pairs.
