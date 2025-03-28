@@ -4,6 +4,7 @@
 # It provides a way to expose HTTP and HTTPS routes from outside the cluster to the appropriate service based on the defined rules.
 module "nginx-controller" {
   source = "terraform-iaac/nginx-controller/helm"
+  version = ">=2.3.0"
 
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
