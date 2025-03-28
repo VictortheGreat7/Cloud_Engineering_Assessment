@@ -3,7 +3,7 @@
 # This module deploys the NGINX Ingress Controller to the Kubernetes cluster.
 # It provides a way to expose HTTP and HTTPS routes from outside the cluster to the appropriate service based on the defined rules.
 module "nginx-controller" {
-  source = "terraform-iaac/nginx-controller/helm"
+  source  = "terraform-iaac/nginx-controller/helm"
   version = ">=2.3.0"
 
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
@@ -31,10 +31,17 @@ module "nginx-controller" {
 # }
 
 module "certmanager" {
-   source     = "dodevops/certmanager/azure"
-   version    = "0.2.0"
- 
-   cluster-issuers-yaml = <<-YAML
+  source  = "dodevops/certmanager/azure"
+  version = "0.2.0"
+
+  set-list = [
+    {
+      name  = "installCRDs"
+      value = "true"
+      type  = "auto"
+    }
+  ]
+  cluster-issuers-yaml = <<-YAML
    clusterIssuers:
      - name: certmanager
        spec:
@@ -48,9 +55,9 @@ module "certmanager" {
                  ingress:
                    class: nginx
    YAML
- 
-   depends_on = [module.nginx-controller]
- }
+
+  depends_on = [module.nginx-controller]
+}
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
 # A ConfigMap is used to store non-confidential data in key-value pairs.
