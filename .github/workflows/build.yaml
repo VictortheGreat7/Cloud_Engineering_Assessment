@@ -93,8 +93,8 @@ jobs:
     # Get AKS Credentials for domain.sh script
     - name: Get AKS Credentials
       run: |
-        RESOURCE_GROUP=`terraform output -raw aks_resource_group`
-        CLUSTER_NAME=`terraform output -raw aks_cluster_name`
+        RESOURCE_GROUP=$(terraform output -raw "aks_resource_group")
+        CLUSTER_NAME=$(terraform output -raw "aks_cluster_name")
         az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
       working-directory: ./terraform
     
