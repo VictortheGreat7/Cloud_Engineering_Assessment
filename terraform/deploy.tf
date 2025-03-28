@@ -8,41 +8,17 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-resource "helm_release" "cert_manager" {
-  name             = "cert-manager"
-  chart            = "cert-manager"
-  repository       = "https://charts.jetstack.io"
+module "cert_manager" {
+  source  = "terraform-iaac/cert-manager/kubernetes"
+  version = ">=2.10.0"
+
   namespace        = "cert-manager"
+  email            = "greatvictor.anjorin@gmail.com"
+  server           = "https://acme-v02.api.letsencrypt.org/directory"
+  ingress_class    = "nginx"
   create_namespace = true
-  version          = "v1.16.0"
 
-  set {
-    name  = "crds.enabled"
-    value = "true"
-  }
-
-  depends_on = [module.nginx-controller]
-}
-
-resource "kubectl_manifest" "certmanager_clusterissuer" {
-  yaml_body = <<YAML
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: certmanager
-spec:
-  acme:
-    email: "greatvictor.anjorin@gmail.com"
-    server: "https://acme-v02.api.letsencrypt.org/directory"
-    privateKeySecretRef:
-      name: certmanager
-    solvers:
-      - http01:
-          ingress:
-            class: nginx
-YAML
-
-  depends_on = [helm_release.cert_manager]
+  depends_on = [azurerm_kubernetes_cluster.time_api_cluster, module.nginx-controller]
 }
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
@@ -171,7 +147,7 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service.time_api, helm_release.cert_manager, kubectl_manifest.certmanager_clusterissuer]
+  depends_on = [kubernetes_service.time_api, module.cert_manager]
 }
 
 # This tests the time API by sending 50 requests to the service and checking if the response is successful.
