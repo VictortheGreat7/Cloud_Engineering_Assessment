@@ -178,7 +178,7 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service.time_api, module.cert_manager]
+  depends_on = [kubernetes_service.time_api, module.certmanager]
 }
 
 # This tests the time API by sending 50 requests to the service and checking if the response is successful.
