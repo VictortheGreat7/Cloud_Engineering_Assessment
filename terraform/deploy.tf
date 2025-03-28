@@ -9,27 +9,6 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-# module "cert_manager" {
-#   source  = "terraform-iaac/cert-manager/kubernetes"
-#   version = ">=2.6.4"
-
-#   create_namespace      = true
-#   cluster_issuer_name   = "certmanager"
-#   cluster_issuer_email  = "greatvictor.anjorin@gmail.com"
-#   cluster_issuer_server = "https://acme-v02.api.letsencrypt.org/directory"
-#   solvers = [
-#     {
-#       http01 = {
-#         ingress = {
-#           class = "nginx"
-#         }
-#       }
-#     }
-#   ]
-
-#   depends_on = [azurerm_kubernetes_cluster.time_api_cluster, module.nginx-controller]
-# }
-
 module "certmanager" {
   source  = "dodevops/certmanager/azure"
   version = "0.2.0"
@@ -218,7 +197,6 @@ resource "kubernetes_job" "time_api_loadtest" {
       }
     }
     backoff_limit = 4
-    # Add active deadline seconds to ensure the job completes
     active_deadline_seconds = 300
   }
 

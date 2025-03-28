@@ -90,11 +90,15 @@ jobs:
     - name: Install Kubelogin
       run: sudo az aks install-cli
 
+    - name: Set environment variables
+      run: |
+        echo "CLUSTER_NAME=$(terraform output -raw aks_cluster_name | tr -d '\n' | tr -d '\r')" >> $GITHUB_ENV
+        echo "RESOURCE_GROUP=$(terraform output -raw aks_resource_group | tr -d '\n' | tr -d '\r')" >> $GITHUB_ENV
+      working-directory: ./terraform
+
     # Get AKS Credentials for domain.sh script
     - name: Get AKS Credentials
       run: |
-        RESOURCE_GROUP=$(terraform output "aks_resource_group")
-        CLUSTER_NAME=$(terraform output "aks_cluster_name")
         az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
       working-directory: ./terraform
     
@@ -102,6 +106,7 @@ jobs:
     - name: Authenticate with Kubelogin
       run: |
         kubelogin convert-kubeconfig -l azurecli
+      working-directory: ./terraform
 
     # Run bash script to configure the domain
     - name: Run inline bash script
