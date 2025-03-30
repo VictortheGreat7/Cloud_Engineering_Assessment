@@ -6,13 +6,6 @@ module "nginx-controller" {
   source  = "terraform-iaac/nginx-controller/helm"
   version = ">=2.3.0"
 
-  additional_set = [
-    {
-      name  = "controller.extraArgs.enable-ssl-passthrough"
-      value = "true"
-    }
-  ]
-
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
@@ -61,7 +54,14 @@ module "certmanager" {
           privateKeySecretRef:
             name: certmanager
           solvers:
-            - tls-alpn-01: {}
+            - dns01:
+                azureDNS:
+                  resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
+                  subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
+                  hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
+                  environment: AzurePublicCloud
+                  managedIdentity:
+                    clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
 YAML
 
   depends_on = [module.nginx-controller]
