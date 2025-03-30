@@ -8,6 +8,15 @@ data "azuread_client_config" "current" {}
 
 data "azurerm_client_config" "current" {}
 
+data "azurerm_kubernetes_cluster" "time_api_cluster" {
+  name                = azurerm_kubernetes_cluster.time_api_cluster.name
+  resource_group_name = azurerm_kubernetes_cluster.time_api_cluster.resource_group_name
+
+  depends_on = [
+    azurerm_kubernetes_cluster.time_api_cluster
+  ]
+}
+
 # Add a data source to get the ingress IP after it's created
 data "kubernetes_service" "nginx_ingress" {
   metadata {
