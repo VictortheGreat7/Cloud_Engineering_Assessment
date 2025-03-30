@@ -37,7 +37,7 @@ module "certmanager" {
 
   set-list = [
     {
-      name  = "installCRDs"
+      name = "installCRDs"
       # name  = "crds.create"
       # name  = "createCRD"
       value = "true"
@@ -61,7 +61,7 @@ module "certmanager" {
                   hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
                   environment: AzurePublicCloud
                   managedIdentity:
-                    clientID: "${var.my_user_object_id}"
+                    clientID: "${azurerm_kubernetes_cluster.time_api_cluster.identity[0].principal_id}"
 YAML
 
   depends_on = [module.nginx-controller]

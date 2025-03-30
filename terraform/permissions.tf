@@ -33,7 +33,7 @@ resource "azurerm_role_assignment" "cluster_role_assignment" {
 resource "azurerm_role_assignment" "time_api_admins_rg_access" {
   scope                = azurerm_dns_zone.mywonder_works.id
   role_definition_name = "DNS Zone Contributor"
-  principal_id         = var.my_user_object_id
+  principal_id         = azurerm_kubernetes_cluster.time_api_cluster.identity[0].principal_id
 
   depends_on = [
     azurerm_dns_zone.mywonder_works
