@@ -15,7 +15,7 @@ module "certmanager" {
 
   set-list = [
     {
-      name  = "installCRDs"
+      name  = "crds.create"
       value = "true"
       type  = "auto"
     }
