@@ -61,7 +61,7 @@ module "certmanager" {
       type  = "auto"
     }
   ]
-  cluster-issuers-yaml = format(<<-YAML
+  cluster-issuers-yaml = <<-YAML
   clusterIssuers:
     - name: certmanager
       spec:
@@ -73,17 +73,13 @@ module "certmanager" {
           solvers:
             - dns01:
                 azureDNS:
-                  resourceGroupName: "%s"
-                  subscriptionID: "%s"
-                  hostedZoneName: "%s"
+                  resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
+                  subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
+                  hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
                   environment: AzurePublicCloud
                   managedIdentity:
-                    clientID: "%s"
+                    clientID: "${var.my_user_object_id}"
 YAML
-    , azurerm_dns_zone.mywonder_works.resource_group_name,
-    "d31507f4-324c-4bd1-abe1-5cdf45cba77d",
-    azurerm_dns_zone.mywonder_works.name,
-  var.my_user_object_id)
 
   depends_on = [module.nginx-controller]
 }
