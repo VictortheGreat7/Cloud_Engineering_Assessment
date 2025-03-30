@@ -61,7 +61,7 @@ module "certmanager" {
                   hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
                   environment: AzurePublicCloud
                   managedIdentity:
-                    clientID: "${azurerm_kubernetes_cluster.time_api_cluster.identity[0].principal_id}"
+                    clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
 YAML
 
   depends_on = [module.nginx-controller]
