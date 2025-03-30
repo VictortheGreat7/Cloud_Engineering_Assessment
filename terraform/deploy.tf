@@ -83,7 +83,7 @@ YAML
     , azurerm_dns_zone.mywonder_works.resource_group_name,
     "d31507f4-324c-4bd1-abe1-5cdf45cba77d",
     azurerm_dns_zone.mywonder_works.name,
-  my_user_object_id)
+  var.my_user_object_id)
 
   depends_on = [module.nginx-controller]
 }
