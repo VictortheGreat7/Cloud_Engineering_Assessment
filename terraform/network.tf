@@ -107,7 +107,3 @@ resource "azurerm_nat_gateway_public_ip_association" "time_api_natgw_public_ip_a
   nat_gateway_id       = azurerm_nat_gateway.time_api_nat_gateway.id
   public_ip_address_id = azurerm_public_ip.time_api_public_ip.id
 }
-
-output "gateway_ips" {
-  value = azurerm_public_ip.time_api_public_ip
-}

@@ -9,20 +9,6 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-# Add a data source to get the ingress IP after it's created
-data "kubernetes_service" "nginx_ingress" {
-  metadata {
-    name      = "ingress-nginx-controller"
-    namespace = "kube-system" # Adjust if your controller is in a different namespace
-  }
-  depends_on = [module.nginx-controller]
-}
-
-# Output the ingress IP for reference
-output "ingress_ip" {
-  value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
-}
-
 # Create the DNS Zone
 resource "azurerm_dns_zone" "mywonder_works" {
   name                = "mywonder.works"
@@ -43,11 +29,6 @@ resource "azurerm_dns_a_record" "api" {
   records             = [data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip]
 
   depends_on = [module.nginx-controller, data.kubernetes_service.nginx_ingress]
-}
-
-# Output the name servers - you'll need these to update your domain registrar
-output "name_servers" {
-  value = azurerm_dns_zone.mywonder_works.name_servers
 }
 
 module "certmanager" {

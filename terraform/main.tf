@@ -69,16 +69,3 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
     Environment = "test"
   }
 }
-
-output "kube_config" {
-  value     = azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config
-  sensitive = true
-}
-
-output "aks_cluster_name" {
-  value = azurerm_kubernetes_cluster.time_api_cluster.name
-}
-
-output "aks_resource_group" {
-  value = azurerm_resource_group.time_api_rg.name
-}
