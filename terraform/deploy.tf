@@ -12,8 +12,8 @@ module "nginx-controller" {
 # Add a data source to get the ingress IP after it's created
 data "kubernetes_service" "nginx_ingress" {
   metadata {
-    name      = "nginx-controller-ingress-nginx-controller"
-    namespace = "default" # Adjust if your controller is in a different namespace
+    name      = "ingress-nginx-controller"
+    namespace = "kube-system" # Adjust if your controller is in a different namespace
   }
   depends_on = [module.nginx-controller]
 }
