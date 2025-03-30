@@ -19,13 +19,13 @@ resource "azurerm_role_assignment" "cluster_role_assignment" {
   ]
 }
 
-# # Assign Contributor role to the AAD group for the Resource Group
-# resource "azurerm_role_assignment" "time_api_admins_rg_access" {
-#   scope                = azurerm_resource_group.time_api_rg.id
-#   role_definition_name = "Contributor"
-#   principal_id         = azuread_group.time_api_admins.object_id
+# Assign Contributor role to the AAD group for the Resource Group
+resource "azurerm_role_assignment" "time_api_admins_rg_access" {
+  scope                = azurerm_resource_group.time_api_rg.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_group.time_api_admins.object_id
 
-#   depends_on = [
-#     azurerm_resource_group.time_api_rg
-#   ]
-# }
+  depends_on = [
+    azurerm_resource_group.time_api_rg
+  ]
+}
