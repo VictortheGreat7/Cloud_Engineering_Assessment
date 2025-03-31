@@ -19,6 +19,17 @@ resource "azurerm_role_assignment" "cluster_role_assignment" {
   ]
 }
 
+# Assign Contributor role to the AAD group for the Resource Group
+resource "azurerm_role_assignment" "time_api_admins_rg_access" {
+  scope                = azurerm_resource_group.time_api_rg.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_group.time_api_admins.object_id
+
+  depends_on = [
+    azurerm_resource_group.time_api_rg
+  ]
+}
+
 resource "azurerm_role_assignment" "agentpool_dns_zone_contributor" {
   scope                = azurerm_dns_zone.mywonder_works.id
   role_definition_name = "DNS Zone Contributor"
