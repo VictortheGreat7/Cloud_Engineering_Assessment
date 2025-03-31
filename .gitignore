@@ -1,5 +1,4 @@
 *.terraform*
-deployments/
-**/terraform.tfvars
-gh_secret.sh
-.env
+**/deployments/
+# **/terraform/*.tfvars
+/*.sh

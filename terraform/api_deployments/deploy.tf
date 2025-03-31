@@ -9,37 +9,13 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-# Create the DNS Zone
-resource "azurerm_dns_zone" "mywonder_works" {
-  name                = "mywonder.works"
-  resource_group_name = azurerm_resource_group.time_api_rg.name
-
-  tags = {
-    environment = "test"
-  }
-
-  depends_on = [module.nginx-controller]
-}
-
-resource "azurerm_dns_a_record" "api" {
-  name                = "api"
-  zone_name           = azurerm_dns_zone.mywonder_works.name
-  resource_group_name = azurerm_dns_zone.mywonder_works.resource_group_name
-  ttl                 = 300
-  records             = [data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip]
-
-  depends_on = [module.nginx-controller, data.kubernetes_service.nginx_ingress]
-}
-
 module "certmanager" {
   source  = "dodevops/certmanager/azure"
   version = "0.2.0"
 
   set-list = [
     {
-      name = "installCRDs"
-      # name  = "crds.create"
-      # name  = "createCRD"
+      name  = "installCRDs"
       value = "true"
       type  = "auto"
     }
@@ -234,4 +210,18 @@ resource "kubernetes_job" "time_api_loadtest" {
   timeouts {
     create = "5m"
   }
+}
+
+# Add a data source to get the ingress IP after it's created
+data "kubernetes_service" "nginx_ingress" {
+  metadata {
+    name      = "ingress-nginx-controller"
+    namespace = "kube-system" # Adjust if your controller is in a different namespace
+  }
+  depends_on = [module.nginx-controller]
+}
+
+# Output the ingress IP for reference
+output "ingress_ip" {
+  value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
 }

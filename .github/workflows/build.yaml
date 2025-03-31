@@ -9,10 +9,10 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write  # Changed from 'read' to 'write' to allow pushing
 
 jobs:
-  deploy:
+  create-infrastructure:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,13 +40,65 @@ jobs:
         terraform_version: 1.11.3
 
     # Run bash scripts to prepare the backend for Terraform and authorize GitHub Actions runner IP to access the AKS cluster
-    - name: Run inline bash script
+    - name: Create Terraform Backend
       run: |
         chmod +x pre-apply.sh
-        chmod +x runner_ip.sh
         ./pre-apply.sh
-        ./runner_ip.sh
       working-directory: ./terraform
+
+    # Initialize Terraform
+    - name: Terraform Init
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init
+      working-directory: ./terraform
+
+    # Apply Terraform configuration
+    - name: Terraform Apply
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform apply --auto-approve
+      working-directory: ./terraform
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: create-infrastructure
+
+    steps:
+      # Login to Azure CLI using the Azure login action
+    - uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # This step checks that the Azure account is logged in
+    - name: Azure CLI script
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az account show
+
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Setup Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.11.3
+
+    # Move deployment scripts to the correct directory
+    - name: Move deployment scripts
+      run: |
+        mv * ..
+      working-directory: ./terraform/api_deployments
 
     # Initialize Terraform
     - name: Terraform Init
@@ -101,8 +153,40 @@ jobs:
         chmod +x domain.sh
         ./domain.sh
       working-directory: ./terraform
+      
+    # Modify workflow file to comment out push trigger
+    - name: Modify workflow file
+      run: |
+        WORKFLOW_FILE=".github/workflows/build.yaml"
 
-    # Clean up
-    - name: Clean up
-      if: always()
-      run: rm -f vault_password.txt
+        # Modify the workflow file to comment out push trigger
+        sed -i 's/  push:/  #push:/g' "$WORKFLOW_FILE"
+        sed -i 's/    branches:/    #branches:/g' "$WORKFLOW_FILE"
+        sed -i 's/      - main/      #- main/g' "$WORKFLOW_FILE"
+
+        cat "$WORKFLOW_FILE"
+      working-directory: ./
+      
+    # Setup Git for pushing changes
+    - name: Configure Git
+      env:
+        PAT: ${{ secrets.GH_PAT }}
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "github-actions@github.com"
+        git remote set-url origin https://x-access-token:$PAT@github.com/${{ github.repository }}
+    
+    # Create and push to deployed branch
+    - name: Push changes to deployed branch
+      run: |
+        # Check if there are changes
+        if ! git diff --quiet; then
+          echo "Changes detected, creating 'deployed' branch"
+          git checkout -b deployed
+          git add .
+          git commit -m "Automated deployment: Comment out push trigger [skip ci]"
+          git push -f origin deployed
+        else
+          echo "No changes detected"
+        fi
+      working-directory: ./
