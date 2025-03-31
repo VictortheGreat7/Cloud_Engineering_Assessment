@@ -127,47 +127,47 @@ jobs:
       run: terraform apply --auto-approve
       working-directory: ./terraform
 
-    # # Setup kubectl for domain.sh script
-    # - name: Setup kubectl
-    #   uses: azure/setup-kubectl@v3
-    #   with:
-    #     version: 'v1.30.3'
+    # Setup kubectl for domain.sh script
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.30.3'
 
-    # # Install Kubelogin for domain.sh script
-    # - name: Install Kubelogin
-    #   run: sudo az aks install-cli
+    # Install Kubelogin for domain.sh script
+    - name: Install Kubelogin
+      run: sudo az aks install-cli
 
-    # # Get AKS Credentials for domain.sh script
-    # - name: Get AKS Credentials
-    #   run: |
-    #     RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
-    #     CLUSTER_NAME=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
-    #     az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
-    #   working-directory: ./terraform
+    # Get AKS Credentials for domain.sh script
+    - name: Get AKS Credentials
+      run: |
+        RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
+        CLUSTER_NAME=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
+        az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
+      working-directory: ./terraform
     
-    # # Authenticate with Kubelogin
-    # - name: Authenticate with Kubelogin
-    #   run: |
-    #     kubelogin convert-kubeconfig -l azurecli
+    # Authenticate with Kubelogin
+    - name: Authenticate with Kubelogin
+      run: |
+        kubelogin convert-kubeconfig -l azurecli
 
-    # # Run bash script to configure the domain
-    # - name: Run inline bash script
-    #   env:
-    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-    #     DOMAIN: ${{ secrets.DOMAIN }}
-    #   run: |
-    #     NAMESERVERS=$(terraform output -json name_servers)
+    # Run bash script to configure the domain
+    - name: Run inline bash script
+      env:
+        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+        DOMAIN: ${{ secrets.DOMAIN }}
+      run: |
+        NAMESERVERS=$(terraform output -json name_servers)
 
-    #     export AZURE_NS1=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS1
-    #     export AZURE_NS2=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS2
-    #     export AZURE_NS3=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 5 | tail -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS3
-    #     export AZURE_NS4=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 7 | tail -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS4
+        export AZURE_NS1=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS1
+        export AZURE_NS2=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS2
+        export AZURE_NS3=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 5 | tail -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS3
+        export AZURE_NS4=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 7 | tail -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS4
 
-    #     chmod +x domain.sh
-    #     ./domain.sh
-    #   working-directory: ./terraform
+        chmod +x domain.sh
+        ./domain.sh
+      working-directory: ./terraform

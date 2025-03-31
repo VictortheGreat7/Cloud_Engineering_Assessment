@@ -13,7 +13,7 @@ resource "helm_release" "cert_manager" {
   name       = "cert-manager"
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
-  version    = "v1.17.1"
+  version    = "v1.5.4"
 
   create_namespace = true
   namespace        = "cert-manager"
@@ -32,35 +32,67 @@ resource "time_sleep" "wait" {
   depends_on = [helm_release.cert_manager]
 }
 
+# resource "helm_release" "cert-manager-issuers" {
+#   chart      = "cert-manager-issuers"
+#   name       = "cert-manager-issuers"
+#   version    = "0.3.0"
+#   repository = "https://charts.adfinis.com"
+
+#   values = [<<-YAML
+#   clusterIssuers:
+#     - name: certmanager
+#       spec:
+#         acme:
+#           email: "greatvictor.anjorin@gmail.com"
+#           server: "https://acme-v02.api.letsencrypt.org/directory"
+#           privateKeySecretRef:
+#             name: certmanager
+#           solvers:
+#             - dns01:
+#                 azureDNS:
+#                   resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
+#                   subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
+#                   hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
+#                   environment: AzurePublicCloud
+#                   managedIdentity:
+#                     clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
+# YAML
+#   ]
+
+#   depends_on = [helm_release.cert_manager, time_sleep.wait]
+# }
+
 resource "helm_release" "cert-manager-issuers" {
   chart      = "cert-manager-issuers"
   name       = "cert-manager-issuers"
-  version    = "0.3.0"
+  version    = "0.2.2"
   repository = "https://charts.adfinis.com"
 
-  values = [<<-YAML
-  clusterIssuers:
-    - name: certmanager
-      spec:
-        acme:
-          email: "greatvictor.anjorin@gmail.com"
-          server: "https://acme-v02.api.letsencrypt.org/directory"
-          privateKeySecretRef:
-            name: certmanager
-          solvers:
-            - dns01:
-                azureDNS:
-                  resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
-                  subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
-                  hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
-                  environment: AzurePublicCloud
-                  managedIdentity:
-                    clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
-YAML
+  values = [
+    <<-EOT
+clusterIssuers:
+  - name: certmanager
+    spec:
+      acme:
+        email: "greatvictor.anjorin@gmail.com"
+        server: "https://acme-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef:
+          name: certmanager
+        solvers:
+          - dns01:
+              azureDNS:
+                resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
+                subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
+                hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
+                environment: AzurePublicCloud
+                managedIdentity:
+                  clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
+EOT
   ]
 
   depends_on = [helm_release.cert_manager, time_sleep.wait]
 }
+
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
 # A ConfigMap is used to store non-confidential data in key-value pairs.
