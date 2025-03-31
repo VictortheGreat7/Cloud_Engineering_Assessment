@@ -156,13 +156,13 @@ jobs:
         TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        NAMESERVERS=$(terraform output -json name_servers)
-
-        AZURE_NS1=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
-        AZURE_NS2=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 2 | tail -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
-        AZURE_NS3=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
-        AZURE_NS4=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 4 | tail -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
-
-        chmod +x domain.sh
-        ./domain.sh
+        terraform output -json name_servers
       working-directory: ./terraform
+
+        # AZURE_NS1=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
+        # AZURE_NS2=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 2 | tail -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
+        # AZURE_NS3=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
+        # AZURE_NS4=$(echo "$NAMESERVERS" | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | grep -oP '"\K[^"]+(?=")' | head -n 4 | tail -n 1 | sed 's/,//; s/\.$//' | grep -v '^0$')
+
+        # chmod +x domain.sh
+        # ./domain.sh
