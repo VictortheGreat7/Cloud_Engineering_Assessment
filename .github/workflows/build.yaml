@@ -12,69 +12,69 @@ permissions:
   contents: read  # Changed from 'read' to 'write' to allow pushing
 
 jobs:
-  create-infrastructure:
-    runs-on: ubuntu-latest
+  # create-infrastructure:
+  #   runs-on: ubuntu-latest
 
-    steps:
-    # Login to Azure CLI using the Azure login action
-    - uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #   steps:
+  #   # Login to Azure CLI using the Azure login action
+  #   - uses: azure/login@v2
+  #     with:
+  #       creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # This step checks that the Azure account is logged in
-    - name: Azure CLI script
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          az account show
+  #   # This step checks that the Azure account is logged in
+  #   - name: Azure CLI script
+  #     uses: azure/cli@v2
+  #     with:
+  #       azcliversion: latest
+  #       inlineScript: |
+  #         az account show
 
-    # Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v2
+  #   # Checkout the repository
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
 
-    # Setup Terraform
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.11.3
+  #   # Setup Terraform
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v2
+  #     with:
+  #       terraform_version: 1.11.3
 
-    # # Move deployment scripts to the correct directory
-    # - name: Move deployment scripts
-    #   run: |
-    #     mv * ..
-    #   working-directory: ./terraform/api_deployments
+  #   # # Move deployment scripts to the correct directory
+  #   # - name: Move deployment scripts
+  #   #   run: |
+  #   #     mv * ..
+  #   #   working-directory: ./terraform/api_deployments
 
-    # Run bash scripts to prepare the backend for Terraform and authorize GitHub Actions runner IP to access the AKS cluster
-    - name: Create Terraform Backend
-      run: |
-        chmod +x pre-apply.sh
-        ./pre-apply.sh
-      working-directory: ./terraform
+  #   # Run bash scripts to prepare the backend for Terraform and authorize GitHub Actions runner IP to access the AKS cluster
+  #   - name: Create Terraform Backend
+  #     run: |
+  #       chmod +x pre-apply.sh
+  #       ./pre-apply.sh
+  #     working-directory: ./terraform
 
-    # Initialize Terraform
-    - name: Terraform Init
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: terraform init
-      working-directory: ./terraform
+  #   # Initialize Terraform
+  #   - name: Terraform Init
+  #     env:
+  #       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  #       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  #       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  #       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  #     run: terraform init
+  #     working-directory: ./terraform
 
-    # Apply Terraform configuration
-    - name: Terraform Apply
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: terraform apply --auto-approve
-      working-directory: ./terraform
+  #   # Apply Terraform configuration
+  #   - name: Terraform Apply
+  #     env:
+  #       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  #       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  #       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  #       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  #     run: terraform apply --auto-approve
+  #     working-directory: ./terraform
 
   deploy:
     runs-on: ubuntu-latest
-    needs: create-infrastructure
+    # needs: create-infrastructure
 
     steps:
       # Login to Azure CLI using the Azure login action
