@@ -158,9 +158,13 @@ jobs:
       run: |
         NAMESERVERS=$(terraform output -json name_servers)
         AZURE_NS1=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS1
         AZURE_NS2=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS2
         AZURE_NS3=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 5 | tail -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS3
         AZURE_NS4=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 7 | tail -n 1 | sed 's/,//; s/\.$//')
+        echo $AZURE_NS4
         chmod +x domain.sh
         ./domain.sh
       working-directory: ./terraform
