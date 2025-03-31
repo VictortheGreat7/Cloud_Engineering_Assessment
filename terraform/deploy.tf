@@ -9,40 +9,6 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-# module "certmanager" {
-#   source  = "dodevops/certmanager/azure"
-#   version = "0.2.0"
-
-#   set-list = [
-#     {
-#       name  = "installCRDs"
-#       value = "true"
-#       type  = "auto"
-#     }
-#   ]
-#   cluster-issuers-yaml = <<-YAML
-#   clusterIssuers:
-#     - name: certmanager
-#       spec:
-#         acme:
-#           email: "greatvictor.anjorin@gmail.com"
-#           server: "https://acme-v02.api.letsencrypt.org/directory"
-#           privateKeySecretRef:
-#             name: certmanager
-#           solvers:
-#             - dns01:
-#                 azureDNS:
-#                   resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
-#                   subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
-#                   hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
-#                   environment: AzurePublicCloud
-#                   managedIdentity:
-#                     clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
-# YAML
-
-#   depends_on = [module.nginx-controller]
-# }
-
 resource "helm_release" "cert_manager" {
   name       = "cert-manager"
   repository = "https://charts.jetstack.io"
@@ -56,10 +22,12 @@ resource "helm_release" "cert_manager" {
     name  = "installCRDs"
     value = "true"
   }
+
+  depends_on = [module.nginx-controller]
 }
 
 resource "time_sleep" "wait" {
-  create_duration = "60s"
+  create_duration = "30s"
 
   depends_on = [helm_release.cert_manager]
 }
