@@ -74,7 +74,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: create-infrastructure
+    # needs: create-infrastructure
 
     steps:
       # Login to Azure CLI using the Azure login action
