@@ -157,12 +157,10 @@ jobs:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
         NAMESERVERS=$(terraform output -json name_servers)
-
         AZURE_NS1=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 1 | sed 's/,//; s/\.$//')
-        AZURE_NS2=$( echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//')
+        AZURE_NS2=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//')
         AZURE_NS3=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 5 | tail -n 1 | sed 's/,//; s/\.$//')
         AZURE_NS4=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 7 | tail -n 1 | sed 's/,//; s/\.$//')
-
         chmod +x domain.sh
         ./domain.sh
       working-directory: ./terraform
