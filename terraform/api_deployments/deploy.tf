@@ -9,36 +9,63 @@ module "nginx-controller" {
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
-module "certmanager" {
-  source  = "dodevops/certmanager/azure"
-  version = "0.2.0"
+# module "certmanager" {
+#   source  = "dodevops/certmanager/azure"
+#   version = "0.2.0"
 
-  set-list = [
+#   set-list = [
+#     {
+#       name  = "installCRDs"
+#       value = "true"
+#       type  = "auto"
+#     }
+#   ]
+#   cluster-issuers-yaml = <<-YAML
+#   clusterIssuers:
+#     - name: certmanager
+#       spec:
+#         acme:
+#           email: "greatvictor.anjorin@gmail.com"
+#           server: "https://acme-v02.api.letsencrypt.org/directory"
+#           privateKeySecretRef:
+#             name: certmanager
+#           solvers:
+#             - dns01:
+#                 azureDNS:
+#                   resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
+#                   subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
+#                   hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
+#                   environment: AzurePublicCloud
+#                   managedIdentity:
+#                     clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
+# YAML
+
+#   depends_on = [module.nginx-controller]
+# }
+
+module "certmanager" {
+  source  = "terraform-iaac/cert-manager/kubernetes"
+  version = "2.6.4"
+
+  cluster_issuer_email                   = "greatvictor.anjorin@gmail.com"
+  cluster_issuer_name                    = "certmanager"
+  cluster_issuer_private_key_secret_name = "certmanager"
+
+  solvers = [
     {
-      name  = "installCRDs"
-      value = "true"
-      type  = "auto"
+      dns01 = {
+        azureDNS = {
+          resourceGroupName = azurerm_dns_zone.mywonder_works.resource_group_name
+          subscriptionID    = "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
+          hostedZoneName    = azurerm_dns_zone.mywonder_works.name
+          environment       = "AzurePublicCloud"
+          managedIdentity = {
+            clientID = data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id
+          }
+        }
+      }
     }
   ]
-  cluster-issuers-yaml = <<-YAML
-  clusterIssuers:
-    - name: certmanager
-      spec:
-        acme:
-          email: "greatvictor.anjorin@gmail.com"
-          server: "https://acme-v02.api.letsencrypt.org/directory"
-          privateKeySecretRef:
-            name: certmanager
-          solvers:
-            - dns01:
-                azureDNS:
-                  resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
-                  subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
-                  hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
-                  environment: AzurePublicCloud
-                  managedIdentity:
-                    clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
-YAML
 
   depends_on = [module.nginx-controller]
 }
