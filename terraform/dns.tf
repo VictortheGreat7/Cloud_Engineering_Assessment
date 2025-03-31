@@ -19,19 +19,3 @@ resource "azurerm_dns_a_record" "api" {
 
   depends_on = [module.nginx-controller, data.kubernetes_service.nginx_ingress]
 }
-
-resource "azurerm_role_assignment" "agentpool_dns_zone_contributor" {
-  scope                = azurerm_dns_zone.mywonder_works.id
-  role_definition_name = "DNS Zone Contributor"
-
-  principal_id = data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id
-
-  depends_on = [
-    azurerm_dns_zone.mywonder_works
-  ]
-}
-
-# Output the name servers - you'll need these to update your domain registrar
-output "name_servers" {
-  value = azurerm_dns_zone.mywonder_works.name_servers
-}

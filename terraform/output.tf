@@ -14,3 +14,13 @@ output "kube_config" {
   value     = azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config
   sensitive = true
 }
+
+# Output the ingress IP for reference
+output "ingress_ip" {
+  value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
+}
+
+# Output the name servers - you'll need these to update your domain registrar
+output "name_servers" {
+  value = azurerm_dns_zone.mywonder_works.name_servers
+}
