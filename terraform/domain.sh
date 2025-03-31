@@ -16,7 +16,7 @@ PAYLOAD=$(cat <<-EOF
     "$AZURE_NS1",
     "$AZURE_NS2",
     "$AZURE_NS3",
-    "$AZURE_NS4"
+    "$AZURE_NS4",
     "$NAME_COM_NS1",
     "$NAME_COM_NS2",
     "$NAME_COM_NS3",
