@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: time-api-config
-data:
-  TIME_ZONE: "UTC"
