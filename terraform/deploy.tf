@@ -23,76 +23,16 @@ resource "helm_release" "cert_manager" {
     value = "true"
   }
 
+  timeout = 600
+
   depends_on = [module.nginx-controller]
 }
 
-resource "time_sleep" "wait" {
-  create_duration = "15s"
+# resource "time_sleep" "wait" {
+#   create_duration = "5s"
 
-  depends_on = [helm_release.cert_manager]
-}
-
-# resource "helm_release" "cert-manager-issuers" {
-#   chart      = "cert-manager-issuers"
-#   name       = "cert-manager-issuers"
-#   version    = "0.3.0"
-#   repository = "https://charts.adfinis.com"
-
-#   values = [<<-YAML
-#   clusterIssuers:
-#     - name: certmanager
-#       spec:
-#         acme:
-#           email: "greatvictor.anjorin@gmail.com"
-#           server: "https://acme-v02.api.letsencrypt.org/directory"
-#           privateKeySecretRef:
-#             name: certmanager
-#           solvers:
-#             - dns01:
-#                 azureDNS:
-#                   resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
-#                   subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
-#                   hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
-#                   environment: AzurePublicCloud
-#                   managedIdentity:
-#                     clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
-# YAML
-#   ]
-
-#   depends_on = [helm_release.cert_manager, time_sleep.wait]
+#   depends_on = [helm_release.cert_manager]
 # }
-
-resource "helm_release" "cert-manager-issuers" {
-  chart      = "cert-manager-issuers"
-  name       = "cert-manager-issuers"
-  version    = "0.2.2"
-  repository = "https://charts.adfinis.com"
-
-  values = [
-    <<-EOT
-clusterIssuers:
-  - name: certmanager
-    spec:
-      acme:
-        email: "greatvictor.anjorin@gmail.com"
-        server: "https://acme-v02.api.letsencrypt.org/directory"
-        privateKeySecretRef:
-          name: certmanager
-        solvers:
-          - dns01:
-              azureDNS:
-                resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
-                subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
-                hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
-                environment: AzurePublicCloud
-                managedIdentity:
-                  clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
-EOT
-  ]
-
-  depends_on = [helm_release.cert_manager, time_sleep.wait]
-}
-
 
 # This resource creates a ConfigMap in the Kubernetes cluster.
 # A ConfigMap is used to store non-confidential data in key-value pairs.
@@ -183,6 +123,77 @@ resource "kubernetes_service" "time_api" {
   depends_on = [kubernetes_deployment.time_api]
 }
 
+# This tests the time API by sending 50 requests to the service and checking if the response is successful.
+# It's a simple load test to ensure the service is up and running.
+resource "kubernetes_job" "time_api_loadtest" {
+  metadata {
+    name = "time-api-loadtest"
+  }
+
+  spec {
+    template {
+      metadata {
+        name = "time-api-loadtest"
+      }
+      spec {
+        container {
+          name    = "loadtest"
+          image   = "busybox"
+          command = ["/bin/sh", "-c"]
+          args = [<<-EOF
+            for i in $(seq 1 50); do 
+              wget -q -O- http://time-api-service.default.svc.cluster.local:80/time && 
+              echo "Request $i successful"; 
+              sleep 0.1; 
+            done
+          EOF
+          ]
+        }
+        restart_policy = "Never"
+      }
+    }
+    backoff_limit           = 4
+    active_deadline_seconds = 300
+  }
+
+  depends_on = [kubernetes_service.time_api, kubernetes_service.time_api]
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+resource "helm_release" "cert-manager-issuers" {
+  chart      = "cert-manager-issuers"
+  name       = "cert-manager-issuers"
+  version    = "0.3.0"
+  repository = "https://charts.adfinis.com"
+
+  values = [
+    <<-EOT
+clusterIssuers:
+  - name: certmanager
+    spec:
+      acme:
+        email: "greatvictor.anjorin@gmail.com"
+        server: "https://acme-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef:
+          name: certmanager
+        solvers:
+          - dns01:
+              azureDNS:
+                resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
+                subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
+                hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
+                environment: AzurePublicCloud
+                managedIdentity:
+                  clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
+EOT
+  ]
+
+  depends_on = [helm_release.cert_manager, kubernetes_job.time_api_loadtest]
+}
+
 # This gives the time API service an external IP address and makes it accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
   metadata {
@@ -221,44 +232,4 @@ resource "kubernetes_ingress_v1" "time_api" {
   }
 
   depends_on = [kubernetes_service.time_api, helm_release.cert-manager-issuers]
-}
-
-# This tests the time API by sending 50 requests to the service and checking if the response is successful.
-# It's a simple load test to ensure the service is up and running.
-resource "kubernetes_job" "time_api_loadtest" {
-  metadata {
-    name = "time-api-loadtest"
-  }
-
-  spec {
-    template {
-      metadata {
-        name = "time-api-loadtest"
-      }
-      spec {
-        container {
-          name    = "loadtest"
-          image   = "busybox"
-          command = ["/bin/sh", "-c"]
-          args = [<<-EOF
-            for i in $(seq 1 50); do 
-              wget -q -O- http://time-api-service.default.svc.cluster.local:80/time && 
-              echo "Request $i successful"; 
-              sleep 0.1; 
-            done
-          EOF
-          ]
-        }
-        restart_policy = "Never"
-      }
-    }
-    backoff_limit           = 4
-    active_deadline_seconds = 300
-  }
-
-  depends_on = [kubernetes_service.time_api, kubernetes_ingress_v1.time_api]
-
-  timeouts {
-    create = "5m"
-  }
 }

@@ -9,7 +9,7 @@ resource "azuread_group" "time_api_admins" {
   members = [var.my_user_object_id, data.azuread_client_config.current.object_id]
 }
 
-resource "azurerm_role_assignment" "cluster_role_assignment" {
+resource "azurerm_role_assignment" "cluster_rg_access" {
   scope                = azurerm_resource_group.time_api_rg.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_kubernetes_cluster.time_api_cluster.identity[0].principal_id
@@ -30,7 +30,7 @@ resource "azurerm_role_assignment" "time_api_admins_rg_access" {
   ]
 }
 
-resource "azurerm_role_assignment" "agentpool_dns_zone_contributor" {
+resource "azurerm_role_assignment" "agentpool_dns_zone_access" {
   scope                = azurerm_dns_zone.mywonder_works.id
   role_definition_name = "DNS Zone Contributor"
 
