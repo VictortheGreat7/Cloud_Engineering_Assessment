@@ -96,7 +96,7 @@ resource "kubernetes_deployment" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_config_map.time_api_config]
+  depends_on = [kubernetes_config_map.time_api_config, module.nginx-controller]
 }
 
 # This creates a service for the time API deployment, allowing it to be accessed within the cluster.
@@ -156,7 +156,7 @@ resource "kubernetes_job" "time_api_loadtest" {
     active_deadline_seconds = 300
   }
 
-  depends_on = [kubernetes_service.time_api, kubernetes_service.time_api]
+  depends_on = [kubernetes_service.time_api]
 
   timeouts {
     create = "5m"
