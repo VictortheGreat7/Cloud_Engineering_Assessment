@@ -27,7 +27,7 @@ resource "helm_release" "cert_manager" {
 }
 
 resource "time_sleep" "wait" {
-  create_duration = "30s"
+  create_duration = "15s"
 
   depends_on = [helm_release.cert_manager]
 }
