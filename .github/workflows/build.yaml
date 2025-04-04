@@ -62,7 +62,7 @@ jobs:
 
     - name: Test Flask app endpoint
       run: |
-        curl --fail http://localhost:5000 || (docker logs time-api && exit 1)
+        curl --fail http://localhost:5000/time || (docker logs time-api && exit 1)
 
     - name: Push Docker image
       run: |
