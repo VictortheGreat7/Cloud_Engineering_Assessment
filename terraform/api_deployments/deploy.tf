@@ -1,54 +1,4 @@
-# This file is responsible for deploying the time API application to the Azure Kubernetes Service (AKS) cluster.
-
-# This module deploys the NGINX Ingress Controller to the Kubernetes cluster.
-# It provides a way to expose HTTP and HTTPS routes from outside the cluster to the appropriate service based on the defined rules.
-module "nginx-controller" {
-  source  = "terraform-iaac/nginx-controller/helm"
-  version = ">=2.3.0"
-
-  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
-}
-
-resource "helm_release" "cert_manager" {
-  name       = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  version    = "v1.5.4"
-
-  create_namespace = true
-  namespace        = "cert-manager"
-
-  set {
-    name  = "installCRDs"
-    value = "true"
-  }
-
-  timeout = 600
-
-  depends_on = [module.nginx-controller]
-}
-
-# resource "time_sleep" "wait" {
-#   create_duration = "5s"
-
-#   depends_on = [helm_release.cert_manager]
-# }
-
-# This resource creates a ConfigMap in the Kubernetes cluster.
-# A ConfigMap is used to store non-confidential data in key-value pairs.
-# ConfigMaps are used to decouple environment-specific configuration from the container images, allowing for more flexible deployments.
-# The time zone is set to UTC, but this can be changed as needed.
-resource "kubernetes_config_map" "time_api_config" {
-  metadata {
-    name = "time-api-config"
-  }
-
-  data = {
-    TIME_ZONE = "UTC"
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
-}
+# This script defines the instructions for the deployment of the time API application to the Azure Kubernetes Service (AKS) cluster.
 
 # This deploys the time API application to the Kubernetes cluster
 resource "kubernetes_deployment" "time_api" {
@@ -96,7 +46,7 @@ resource "kubernetes_deployment" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_config_map.time_api_config, module.nginx-controller]
+  depends_on = [module.nginx-controller, helm_release.cert_manager_issuers]
 }
 
 # This creates a service for the time API deployment, allowing it to be accessed within the cluster.
@@ -157,41 +107,6 @@ resource "kubernetes_job" "time_api_loadtest" {
   }
 
   depends_on = [kubernetes_service.time_api]
-
-  timeouts {
-    create = "5m"
-  }
-}
-
-resource "helm_release" "cert-manager-issuers" {
-  chart      = "cert-manager-issuers"
-  name       = "cert-manager-issuers"
-  version    = "0.3.0"
-  repository = "https://charts.adfinis.com"
-
-  values = [
-    <<-EOT
-clusterIssuers:
-  - name: certmanager
-    spec:
-      acme:
-        email: "greatvictor.anjorin@gmail.com"
-        server: "https://acme-v02.api.letsencrypt.org/directory"
-        privateKeySecretRef:
-          name: certmanager
-        solvers:
-          - dns01:
-              azureDNS:
-                resourceGroupName: "${azurerm_dns_zone.mywonder_works.resource_group_name}"
-                subscriptionID: "d31507f4-324c-4bd1-abe1-5cdf45cba77d"
-                hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
-                environment: AzurePublicCloud
-                managedIdentity:
-                  clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
-EOT
-  ]
-
-  depends_on = [helm_release.cert_manager, kubernetes_job.time_api_loadtest]
 }
 
 # This gives the time API service an external IP address and makes it accessible from outside the cluster.
@@ -231,5 +146,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service.time_api, helm_release.cert-manager-issuers]
+  depends_on = [kubernetes_job.time_api_loadtest]
 }
