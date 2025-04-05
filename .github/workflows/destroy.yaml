@@ -58,6 +58,6 @@ jobs:
         TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        chmod +x cleanup.sh
-        ./cleanup.sh
+        chmod +x del_A_record.sh
+        ./del_A_record.sh
       working-directory: ./terraform/bash_scripts
