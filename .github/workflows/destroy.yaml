@@ -50,3 +50,10 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       run: terraform destroy --auto-approve
       working-directory: ./terraform
+
+    # Clean up A record
+    - name: Clean up A record
+      run: |
+        chmod +x cleanup.sh
+        ./cleanup.sh
+      working-directory: ./terraform/bash_scripts

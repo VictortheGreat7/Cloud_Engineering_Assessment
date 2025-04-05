@@ -90,7 +90,7 @@ jobs:
       run: |
         chmod +x pre-apply.sh
         ./pre-apply.sh
-      working-directory: ./terraform
+      working-directory: ./terraform/bash_scripts
 
     # Initialize Terraform
     - name: Terraform Init
@@ -171,7 +171,7 @@ jobs:
 
         chmod +x domain.sh
         ./domain.sh
-      working-directory: ./terraform
+      working-directory: ./terraform/bash_scripts
     
     - name: Wait for container to start
       run: |
