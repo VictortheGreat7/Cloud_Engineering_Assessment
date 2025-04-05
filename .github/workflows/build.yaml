@@ -141,11 +141,11 @@ jobs:
     # Get AKS Credentials for domain.sh script
     - name: Get AKS Credentials
       run: |
-        RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
+        RESOURCE_GROUP=$(terraform output -raw aks_resource_group)
 
         echo $RESOURCE_GROUP
 
-        CLUSTER_NAME=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
+        CLUSTER_NAME=$(terraform output -raw aks_cluster_name)
 
         echo $CLUSTER_NAME
 
