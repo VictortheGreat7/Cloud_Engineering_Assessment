@@ -2,9 +2,9 @@ name: Deploy Infrastructure and Configure AKS
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 permissions:
