@@ -74,7 +74,11 @@ clusterIssuers:
                 hostedZoneName: "${azurerm_dns_zone.mywonder_works.name}"
                 environment: AzurePublicCloud
                 managedIdentity:
-                  clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}"
+                  clientID: "${data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id}
+                selector:
+                  dnsZones:
+                    - "mywonder.works"
+                ttlSecondsAfterFinished: 120"
 EOT
   ]
 

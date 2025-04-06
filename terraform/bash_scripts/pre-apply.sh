@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-set -eu
+#!/bin/bash
 
 # Set variables
 RESOURCE_GROUP_NAME=backend-rg
@@ -7,16 +6,16 @@ STORAGE_ACCOUNT_NAME=bunnybackend349
 CONTAINER_NAME=tfstate
 REGION=eastus
 
-# # Check if Azure CLI is installed and user is logged in
-# if ! command -v az &> /dev/null; then
-#     echo "Azure CLI is not installed. Please install it first."
-#     exit 1
-# fi
+# Check if Azure CLI is installed and user is logged in
+if ! command -v az &> /dev/null; then
+    echo "Azure CLI is not installed. Please install it first."
+    exit 1
+fi
 
-# if ! az account show &> /dev/null; then
-#     echo "You are not logged into Azure. Please run 'az login' first."
-#     exit 1
-# fi
+if ! az account show &> /dev/null; then
+    echo "You are not logged into Azure. Please run 'az login' first."
+    exit 1
+fi
 
 # Create resource group
 echo "Creating resource group..."
@@ -38,9 +37,9 @@ if ! az storage account create \
     exit 1
 fi
 
-# # Wait for storage account to be fully provisioned
-# echo "Waiting for storage account to be fully provisioned..."
-# sleep 30
+# Wait for storage account to be fully provisioned
+echo "Waiting for storage account to be fully provisioned..."
+sleep 30
 
 # Verify storage account exists
 echo "Verifying storage account..."
