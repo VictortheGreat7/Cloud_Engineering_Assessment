@@ -1,7 +1,7 @@
 # This script defines the instructions for the deployment of the time API application to the Azure Kubernetes Service (AKS) cluster.
 
 # This deploys the time API application to the Kubernetes cluster
-resource "kubernetes_deployment" "time_api" {
+resource "kubernetes_deployment_v1" "time_api" {
   metadata {
     name = "time-api"
   }
@@ -51,7 +51,7 @@ resource "kubernetes_deployment" "time_api" {
 
 # This creates a service for the time API deployment, allowing it to be accessed within the cluster.
 # The service is of type ClusterIP, which means it will only be accessible from within the cluster.
-resource "kubernetes_service" "time_api" {
+resource "kubernetes_service_v1" "time_api" {
   metadata {
     name = "time-api-service"
   }
@@ -70,12 +70,12 @@ resource "kubernetes_service" "time_api" {
     type = "ClusterIP"
   }
 
-  depends_on = [kubernetes_deployment.time_api]
+  depends_on = [kubernetes_deployment_v1.time_api]
 }
 
 # This tests the time API by sending 50 requests to the service and checking if the response is successful.
 # It's a simple load test to ensure the service is up and running.
-resource "kubernetes_job" "time_api_loadtest" {
+resource "kubernetes_job_v1" "time_api_loadtest" {
   metadata {
     name = "time-api-loadtest"
   }
@@ -106,7 +106,7 @@ resource "kubernetes_job" "time_api_loadtest" {
     active_deadline_seconds = 300
   }
 
-  depends_on = [kubernetes_service.time_api]
+  depends_on = [kubernetes_service_v1.time_api]
 }
 
 # This gives the time API service an external IP address and makes it accessible from outside the cluster.
@@ -135,9 +135,9 @@ resource "kubernetes_ingress_v1" "time_api" {
           path_type = "Prefix"
           backend {
             service {
-              name = kubernetes_service.time_api.metadata[0].name
+              name = kubernetes_service_v1.time_api.metadata[0].name
               port {
-                number = kubernetes_service.time_api.spec[0].port[0].port
+                number = kubernetes_service_v1.time_api.spec[0].port[0].port
               }
             }
           }
@@ -146,5 +146,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_job.time_api_loadtest]
+  depends_on = [kubernetes_job_v1.time_api_loadtest]
 }
