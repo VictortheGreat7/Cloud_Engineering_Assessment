@@ -50,6 +50,16 @@ resource "helm_release" "cert_manager" {
 #   depends_on = [helm_release.cert_manager]
 # }
 
+resource "helm_release" "namecom_webhook" {
+  name       = "namecom-webhook"
+  repository = "https://imgrant.github.io/cert-manager-webhook-namecom"
+  chart      = "cert-manager-webhook-namecom"
+  namespace  = "cert-manager"
+
+  depends_on = [helm_release.cert_manager]
+}
+
+
 resource "kubernetes_secret_v1" "namecom_api_token" {
   metadata {
     name      = "namecom-api-token"
@@ -57,13 +67,12 @@ resource "kubernetes_secret_v1" "namecom_api_token" {
   }
 
   data = {
-    username = var.namecom_username
-    token    = var.namecom_token
+    api-token = base64encode(var.namecom_token)
   }
 
   type = "Opaque"
 
-  depends_on = [helm_release.cert_manager]
+  depends_on = [helm_release.namecom_webhook]
 }
 
 resource "helm_release" "cert_manager_issuers" {
@@ -84,15 +93,16 @@ clusterIssuers:
           name: certmanager
         solvers:
           - dns01:
-              namecom:
-                usernameSecretRef:
-                  name: namecom-api-token
-                  key: username
-                tokenSecretRef:
-                  name: namecom-api-token
-                  key: token
+              webhook:
+                groupName: acme.name.com
+                solverName: namedotcom
+                config:
+                  username: "${var.namecom_username}"
+                  apitokensecret:
+                    name: namecom-api-token
+                    key: api-token               
 EOT
   ]
 
-  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
+  depends_on = [helm_release.cert_manager, helm_release.namecom_webhook, kubernetes_secret_v1.namecom_api_token]
 }
