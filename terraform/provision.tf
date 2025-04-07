@@ -44,12 +44,6 @@ resource "helm_release" "cert_manager" {
   depends_on = [module.nginx-controller]
 }
 
-# resource "time_sleep" "wait_for_crds" {
-#   create_duration = "5s"
-
-#   depends_on = [helm_release.cert_manager]
-# }
-
 resource "helm_release" "namecom_webhook" {
   name       = "namecom-webhook"
   repository = "../webhook/deploy"
@@ -74,6 +68,43 @@ resource "kubernetes_secret_v1" "namecom_api_token" {
 
   depends_on = [helm_release.namecom_webhook]
 }
+
+resource "kubernetes_role" "namecom_webhook_read_secret" {
+  metadata {
+    name      = "namecom-webhook-read-secret"
+    namespace = "cert-manager"
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["get"]
+  }
+
+  depends_on = [kubernetes_secret_v1.namecom_api_token]
+}
+
+resource "kubernetes_role_binding" "namecom_webhook_bind_secret" {
+  metadata {
+    name      = "namecom-webhook-bind-secret"
+    namespace = "cert-manager"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.namecom_webhook_read_secret.metadata[0].name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = "namecom-webhook-cert-manager-webhook-namecom"
+    namespace = "cert-manager"
+  }
+
+  depends_on = [kubernetes_role.namecom_webhook_read_secret]
+}
+
 
 resource "helm_release" "cert_manager_issuers" {
   chart      = "cert-manager-issuers"
@@ -104,5 +135,5 @@ clusterIssuers:
 EOT
   ]
 
-  depends_on = [helm_release.cert_manager, helm_release.namecom_webhook, kubernetes_secret_v1.namecom_api_token]
+  depends_on = [helm_release.cert_manager, kubernetes_role_binding.namecom_webhook_bind_secret]
 }
