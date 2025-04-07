@@ -38,7 +38,17 @@ jobs:
 
     # Checkout the repository
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+
+    - name: Checkout Name.com webhook repo
+      uses: actions/checkout@v4
+      with:
+        repository: imgrant/cert-manager-webhook-namecom
+        path: webhook
+
+    - name: List contents of webhook repo
+      run: ls -la webhook
+
 
     # Login to DockerHub (optional, if pushing)
     - name: Login to DockerHub
