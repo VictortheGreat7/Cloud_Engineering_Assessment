@@ -50,7 +50,7 @@ resource "helm_release" "cert_manager" {
 #   depends_on = [helm_release.cert_manager]
 # }
 
-resource "kubernetes_secret" "namecom_api_token" {
+resource "kubernetes_secret_v1" "namecom_api_token" {
   metadata {
     name      = "namecom-api-token"
     namespace = "cert-manager"
@@ -94,5 +94,5 @@ clusterIssuers:
 EOT
   ]
 
-  depends_on = [helm_release.cert_manager, kubernetes_secret.namecom_api_token]
+  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
 }
