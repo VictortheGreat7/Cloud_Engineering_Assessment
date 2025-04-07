@@ -56,7 +56,7 @@ resource "helm_release" "namecom_webhook" {
 
 resource "kubernetes_secret_v1" "namecom_api_token" {
   metadata {
-    name      = "namecom-api-token"
+    name      = "namedotcom-credentials"
     namespace = "cert-manager"
   }
 
@@ -130,7 +130,7 @@ clusterIssuers:
                 config:
                   username: "${var.namecom_username}"
                   apitokensecret:
-                    name: namecom-api-token
+                    name: namedotcom-credentials
                     key: api-token               
 EOT
   ]
