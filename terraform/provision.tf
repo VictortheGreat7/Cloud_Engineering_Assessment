@@ -78,7 +78,7 @@ resource "kubernetes_role" "namecom_webhook_read_secret" {
   rule {
     api_groups = [""]
     resources  = ["secrets"]
-    verbs      = ["get", "list", "create"]
+    verbs      = ["get", "list", "create", "watch"]
   }
 
   depends_on = [kubernetes_secret_v1.namecom_api_token]
