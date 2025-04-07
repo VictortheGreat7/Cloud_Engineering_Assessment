@@ -63,7 +63,7 @@ resource "kubernetes_secret" "namecom_api_token" {
 
   type = "Opaque"
 
-  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
+  depends_on = [helm_release.cert_manager]
 }
 
 resource "helm_release" "cert_manager_issuers" {
