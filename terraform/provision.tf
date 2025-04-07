@@ -52,7 +52,7 @@ resource "helm_release" "cert_manager" {
 
 resource "helm_release" "namecom_webhook" {
   name       = "namecom-webhook"
-  repository = "../webhook/deploy/cert-manager-webhook-namecom"
+  repository = "../webhook/deploy"
   chart      = "cert-manager-webhook-namecom"
   namespace  = "cert-manager"
 
