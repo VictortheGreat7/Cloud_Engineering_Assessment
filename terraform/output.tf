@@ -20,7 +20,7 @@ output "ingress_ip" {
   value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
 }
 
-# Output the name servers - you'll need these to update your domain registrar
-output "name_servers" {
-  value = azurerm_dns_zone.mywonder_works.name_servers
-}
+# # Output the name servers - you'll need these to update your domain registrar
+# output "name_servers" {
+#   value = azurerm_dns_zone.mywonder_works.name_servers
+# }
