@@ -31,8 +31,8 @@ resource "helm_release" "cert_manager" {
   chart      = "cert-manager"
   version    = "v1.5.4"
 
-  # create_namespace = true
-  # namespace        = "cert-manager"
+  create_namespace = true
+  namespace        = "cert-manager"
 
   set {
     name  = "installCRDs"
@@ -48,6 +48,7 @@ resource "helm_release" "namecom_webhook" {
   name       = "namecom-webhook"
   repository = "../webhook/deploy"
   chart      = "cert-manager-webhook-namecom"
+  namespace  = "cert-manager"
 
   depends_on = [helm_release.cert_manager]
 }
@@ -56,6 +57,7 @@ resource "helm_release" "namecom_webhook" {
 resource "kubernetes_secret_v1" "namecom_api_token" {
   metadata {
     name      = "namedotcom-credentials"
+    namespace = "cert-manager"
   }
 
   data = {
@@ -70,6 +72,7 @@ resource "kubernetes_secret_v1" "namecom_api_token" {
 resource "kubernetes_role" "namecom_webhook_read_secret" {
   metadata {
     name      = "namecom-webhook-read-secret"
+    namespace = "cert-manager"
   }
 
   rule {
@@ -84,6 +87,7 @@ resource "kubernetes_role" "namecom_webhook_read_secret" {
 resource "kubernetes_role_binding" "namecom_webhook_bind_secret" {
   metadata {
     name      = "namecom-webhook-bind-secret"
+    namespace = "cert-manager"
   }
 
   role_ref {
@@ -95,6 +99,7 @@ resource "kubernetes_role_binding" "namecom_webhook_bind_secret" {
   subject {
     kind      = "ServiceAccount"
     name      = "namecom-webhook-cert-manager-webhook-namecom"
+    namespace = "cert-manager"
   }
 
   depends_on = [kubernetes_role.namecom_webhook_read_secret]
@@ -106,6 +111,7 @@ resource "helm_release" "cert_manager_issuers" {
   name       = "cert-manager-issuers"
   version    = "0.3.0"
   repository = "https://charts.adfinis.com"
+  namespace  = "cert-manager"
 
   values = [
     <<-EOT
