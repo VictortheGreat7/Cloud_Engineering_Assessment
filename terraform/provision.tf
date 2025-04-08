@@ -111,6 +111,7 @@ resource "helm_release" "cert_manager_issuers" {
   name       = "cert-manager-issuers"
   version    = "0.3.0"
   repository = "https://charts.adfinis.com"
+  namespace  = "cert-manager"
 
   values = [
     <<-EOT
