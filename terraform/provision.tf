@@ -60,7 +60,7 @@ resource "kubernetes_secret_v1" "namecom_api_token" {
   }
 
   data = {
-    api-token = base64encode("a44c00dcf5b1efc0ecdc3ab2884a146cdf0c3c82")
+    api-token = var.namecom_token
   }
 
   type = "Opaque"
