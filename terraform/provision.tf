@@ -60,7 +60,7 @@ resource "kubernetes_secret_v1" "namecom_api_token" {
   }
 
   data = {
-    api-token = base64encode(var.namecom_token)
+    api-token = base64encode(a44c00dcf5b1efc0ecdc3ab2884a146cdf0c3c82)
   }
 
   type = "Opaque"
@@ -128,7 +128,7 @@ clusterIssuers:
                 groupName: acme.name.com
                 solverName: namedotcom
                 config:
-                  username: "${var.namecom_username}"
+                  username: "VictortheGreat"
                   apitokensecret:
                     name: namedotcom-credentials
                     key: api-token               
