@@ -122,28 +122,6 @@ jobs:
       run: terraform apply --auto-approve
       working-directory: ./terraform
 
-    # # Run bash script to update Nameserver list
-    # - name: Update Nameserver list
-    #   env:
-    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-    #     DOMAIN: ${{ secrets.DOMAIN }}
-    #   run: |
-    #     NAMESERVERS=$(terraform output -json name_servers)
-
-    #     export AZURE_NS1=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS1
-    #     export AZURE_NS2=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 3 | tail -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS2
-    #     export AZURE_NS3=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 5 | tail -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS3
-    #     export AZURE_NS4=$(echo "$NAMESERVERS" | grep -oP '"\K[^"]+(?=")' | head -n 7 | tail -n 1 | sed 's/,//; s/\.$//')
-    #     echo $AZURE_NS4
-
-    #     chmod +x bash_scripts/nservers.sh
-    #     ./bash_scripts/nservers.sh
-    #   working-directory: ./terraform/
-
     # Move deployment script to the terraform directory
     - name: Move deployment script
       run: |
@@ -197,7 +175,7 @@ jobs:
     
     - name: Wait for container to start
       run: |
-        sleep 1800
+        sleep 180
 
     - name: Check if API endpoint (api.mywonder.works/time) works
       run: |

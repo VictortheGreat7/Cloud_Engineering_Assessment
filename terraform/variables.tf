@@ -6,11 +6,6 @@ variable "region" {
   default     = "eastus"
 }
 
-# variable "workstation_IP_address" {
-#   description = "The IP address of the workstation"
-#   type        = string
-# }
-
 variable "my_user_object_id" {
   description = "The object id of the user"
   type        = string

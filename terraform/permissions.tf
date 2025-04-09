@@ -29,14 +29,3 @@ resource "azurerm_role_assignment" "time_api_admins_rg_access" {
     azurerm_resource_group.time_api_rg
   ]
 }
-
-# resource "azurerm_role_assignment" "agentpool_dns_zone_access" {
-#   scope                = azurerm_dns_zone.mywonder_works.id
-#   role_definition_name = "DNS Zone Contributor"
-
-#   principal_id = data.azurerm_kubernetes_cluster.time_api_cluster.kubelet_identity[0].object_id
-
-#   depends_on = [
-#     azurerm_dns_zone.mywonder_works
-#   ]
-# }

@@ -26,10 +26,11 @@ module "nginx-controller" {
 }
 
 resource "helm_release" "cert_manager" {
-  name             = "cert-manager"
-  repository       = "https://charts.jetstack.io"
-  chart            = "cert-manager"
-  version          = "v1.5.4"
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  version    = "v1.5.4"
+
   create_namespace = true
   namespace        = "cert-manager"
 
@@ -68,43 +69,6 @@ resource "kubernetes_secret_v1" "namecom_api_token" {
   depends_on = [helm_release.namecom_webhook]
 }
 
-resource "kubernetes_role" "namecom_webhook_read_secret" {
-  metadata {
-    name      = "namecom-webhook-read-secret"
-    namespace = "cert-manager"
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["secrets"]
-    verbs      = ["get", "list", "create", "watch"]
-  }
-
-  depends_on = [kubernetes_secret_v1.namecom_api_token]
-}
-
-resource "kubernetes_role_binding" "namecom_webhook_bind_secret" {
-  metadata {
-    name      = "namecom-webhook-bind-secret"
-    namespace = "cert-manager"
-  }
-
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "Role"
-    name      = kubernetes_role.namecom_webhook_read_secret.metadata[0].name
-  }
-
-  subject {
-    kind      = "ServiceAccount"
-    name      = "namecom-webhook-cert-manager-webhook-namecom"
-    namespace = "cert-manager"
-  }
-
-  depends_on = [kubernetes_role.namecom_webhook_read_secret]
-}
-
-
 resource "helm_release" "cert_manager_issuers" {
   chart      = "cert-manager-issuers"
   name       = "cert-manager-issuers"
@@ -128,12 +92,12 @@ clusterIssuers:
                 groupName: acme.name.com
                 solverName: namedotcom
                 config:
-                  username: "VictortheGreat"
+                  username: "${var.namecom_username}"
                   apitokensecret:
                     name: namedotcom-credentials
                     key: api-token               
 EOT
   ]
 
-  depends_on = [helm_release.cert_manager, kubernetes_role_binding.namecom_webhook_bind_secret]
+  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
 }
