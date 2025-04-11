@@ -29,8 +29,6 @@ jobs:
     # Setup kubectl for domain.sh script
     - name: Setup kubectl
       uses: azure/setup-kubectl@v3
-      with:
-        version: 'v1.30.3'
 
     # Install Kubelogin for domain.sh script
     - name: Install Kubelogin
@@ -85,15 +83,12 @@ jobs:
     - name: Azure CLI script
       uses: azure/cli@v2
       with:
-        azcliversion: latest
         inlineScript: |
           az account show
 
     # Setup Terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.11.3
 
     # Run bash scripts to prepare the backend for Terraform and authorize GitHub Actions runner IP to access the AKS cluster
     - name: Create Terraform Backend
