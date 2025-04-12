@@ -6,16 +6,24 @@ STORAGE_ACCOUNT_NAME=bunnybackend349
 CONTAINER_NAME=tfstate
 REGION=eastus
 
-# Check if Azure CLI is installed and user is logged in
-if ! command -v az &> /dev/null; then
-    echo "Azure CLI is not installed. Please install it first."
-    exit 1
-fi
+# # Check if Azure CLI is installed and user is logged in
+# if ! command -v az &> /dev/null; then
+#     echo "Azure CLI is not installed. Please install it first."
+#     exit 1
+# fi
 
-if ! az account show &> /dev/null; then
-    echo "You are not logged into Azure. Please run 'az login' first."
-    exit 1
-fi
+# if ! az account show &> /dev/null; then
+#     echo "You are not logged into Azure. Please run 'az login' first."
+#     exit 1
+# fi
+
+# Check if container already exists
+echo "Checking if storage account and container already exist..."
+if az storage container show --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME &> /dev/null; then
+        echo "Storage account and container already exist. Exiting..."
+        exit 0
+    else
+        echo "Container does not exist. Proceeding with creation."
 
 # Create resource group
 echo "Creating resource group..."
