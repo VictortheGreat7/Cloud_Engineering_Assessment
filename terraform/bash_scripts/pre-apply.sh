@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -eu
 
 # Set variables
 RESOURCE_GROUP_NAME=backend-rg
