@@ -1,4 +1,3 @@
 *.terraform*
 **/deployments/
-# **/terraform/*.tfvars
 /*.sh
