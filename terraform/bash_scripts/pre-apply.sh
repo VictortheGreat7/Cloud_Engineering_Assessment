@@ -25,6 +25,7 @@ if az storage container show --name $CONTAINER_NAME --account-name $STORAGE_ACCO
         exit 0
     else
         echo "Container does not exist. Proceeding with creation."
+fi
 
 # Create resource group
 echo "Creating resource group..."
