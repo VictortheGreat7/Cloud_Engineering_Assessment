@@ -117,7 +117,15 @@ jobs:
         USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
         USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
         TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-      run: terraform apply --auto-approve
+      run: |
+        cat <<EOF > terraform.tfvars.json
+        {
+          "my_user_object_id": "$USER_OBJECT_ID",
+          "namecom_username": "$USERNAME",
+          "namecom_token": "$TOKEN"
+        }
+        EOF
+        terraform apply --auto-approve
       working-directory: ./terraform
 
     # Move deployment script to the terraform directory
@@ -146,7 +154,15 @@ jobs:
         USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
         USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
         TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-      run: terraform apply --auto-approve
+      run: |
+        cat <<EOF > terraform.tfvars.json
+        {
+          "my_user_object_id": "$USER_OBJECT_ID",
+          "namecom_username": "$USERNAME",
+          "namecom_token": "$TOKEN"
+        }
+        EOF
+        terraform apply --auto-approve
       working-directory: ./terraform
 
     # Get AKS Credentials for domain.sh script
