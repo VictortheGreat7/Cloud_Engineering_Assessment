@@ -1,10 +1,10 @@
-name: Deploy Infrastructure and Configure AKS
+name: Provision Infrastructure and Deploy API
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -12,55 +12,32 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    # Set up Docker Buildx
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
 
-    # Login to Azure CLI using the Azure login action
-    - name: Login to Azure
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+# Checkout the needed repositories
 
-    # Setup kubectl for domain.sh script
-    - name: Setup kubectl
-      uses: azure/setup-kubectl@v3
-
-    # Install Kubelogin for domain.sh script
-    - name: Install Kubelogin
-      run: sudo az aks install-cli
-
-    # Checkout the repository
-    - name: Checkout repository
+    - name: Checkout this Github repository
       uses: actions/checkout@v4
 
-    - name: Checkout Name.com webhook repo
+    - name: Checkout Name.com webhook Github repository
       uses: actions/checkout@v4
       with:
         repository: imgrant/cert-manager-webhook-namecom
         path: webhook
 
-    - name: List contents of webhook repo
-      run: ls -la webhook
+# Build, test, and push Docker image
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-    # Login to DockerHub (optional, if pushing)
-    - name: Login to DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    # Build time-api Docker image
-    - name: Build Docker image
+    - name: Build time-api Docker image
       run: |
         docker build -t time-api:${{ github.sha }} -t time-api:latest .
 
-    - name: Run container
+    - name: Test run container
       run: |
         docker run -d -p 5000:5000 --name time-api time-api:${{ github.sha }}
 
@@ -72,6 +49,12 @@ jobs:
       run: |
         curl --fail http://localhost:5000/time || (docker logs time-api && exit 1)
 
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
     - name: Push Docker image
       run: |
         docker tag time-api:${{ github.sha }} victorthegreat7/time-api:${{ github.sha }}
@@ -79,26 +62,23 @@ jobs:
         docker push victorthegreat7/time-api:${{ github.sha }}
         docker push victorthegreat7/time-api:latest
 
-    # Check that the Azure account is logged in
-    - name: Azure CLI script
-      uses: azure/cli@v2
-      with:
-        inlineScript: |
-          az account show
+# Provision cloud infrastructure
 
-    # Setup Terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
 
-    # Run bash scripts to prepare the backend for Terraform and authorize GitHub Actions runner IP to access the AKS cluster
-    - name: Create Terraform Backend
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Check for/create Terraform Backend
       run: |
         chmod +x pre-apply.sh
         ./pre-apply.sh
       working-directory: ./terraform/bash_scripts
 
-    # Initialize Terraform
-    - name: Terraform Init
+    - name: Initialize and validate Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -107,8 +87,7 @@ jobs:
       run: terraform init && terraform validate
       working-directory: ./terraform
 
-    # Apply Terraform configuration
-    - name: Terraform Apply
+    - name: Apply Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -129,14 +108,14 @@ jobs:
         terraform apply --auto-approve
       working-directory: ./terraform
 
-    # Move deployment script to the terraform directory
-    - name: Move deployment script
+# Deploy API to AKS
+
+    - name: Move deployment script to the terraform root directory
       run: |
         mv deploy.tf ..
       working-directory: ./terraform/api_deployments
 
-    # Initialize Terraform
-    - name: Terraform Init
+    - name: Initialize and validate Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -145,8 +124,7 @@ jobs:
       run: terraform init && terraform validate
       working-directory: ./terraform
 
-    # Apply Terraform configuration
-    - name: Terraform Apply
+    - name: Apply Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -167,7 +145,14 @@ jobs:
         terraform apply --auto-approve
       working-directory: ./terraform
 
-    # Get AKS Credentials for domain.sh script
+# Configure domain where API endpoint will be accessible
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+
+    - name: Install Kubelogin
+      run: sudo az aks install-cli
+
     - name: Get AKS Credentials
       run: |
         RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
@@ -176,12 +161,10 @@ jobs:
         az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
       working-directory: ./terraform
     
-    # Authenticate with Kubelogin
-    - name: Authenticate with Kubelogin
+    - name: Set up Kubernetes authentication with Azure CLI
       run: |
         kubelogin convert-kubeconfig -l azurecli
 
-    # Run bash script to add A record
     - name: Add A record
       env:
         USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
@@ -191,11 +174,15 @@ jobs:
         chmod +x up_A_record.sh
         ./up_A_record.sh
       working-directory: ./terraform/bash_scripts
-    
-    - name: Wait for container to start
+
+# Test API endpoint
+
+    - name: Wait for certificate to be issued
       run: |
         sleep 180
 
-    - name: Check if API endpoint (api.mywonder.works/time) works
+    - name: Check if API endpoint (api.your.domain/time) works
+      env:
+        DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        curl https://api.mywonder.works/time
+        curl https://api.$DOMAIN/time

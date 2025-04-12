@@ -4,7 +4,7 @@
 # A ConfigMap is used to store non-confidential data in key-value pairs.
 # ConfigMaps are used to decouple environment-specific configuration from the container images, allowing for more flexible deployments.
 # The time zone is set to UTC, but this can be changed as needed.
-resource "kubernetes_config_map_v1" "time_api_config" {
+resource "kubernetes_config_map_v2" "time_api_config" {
   metadata {
     name = "time-api-config"
   }
@@ -54,7 +54,7 @@ resource "helm_release" "namecom_webhook" {
 }
 
 
-resource "kubernetes_secret_v1" "namecom_api_token" {
+resource "kubernetes_secret_v2" "namecom_api_token" {
   metadata {
     name      = "namedotcom-credentials"
     namespace = "cert-manager"
@@ -99,5 +99,5 @@ clusterIssuers:
 EOT
   ]
 
-  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
+  depends_on = [helm_release.cert_manager, kubernetes_secret_v2.namecom_api_token]
 }

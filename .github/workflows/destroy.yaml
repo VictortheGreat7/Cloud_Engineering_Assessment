@@ -1,48 +1,43 @@
 name: Destroy Infrastructure
 
 on:
-  workflow_dispatch: # This allows manual triggering of the workflow from the GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
   destroy:
     runs-on: ubuntu-latest
 
     steps:
-    # Log in to Azure using service principal credentials stored in GitHub Secrets
-    - uses: azure/login@v2
+
+# Destroy Terraform Resources
+
+    - name: Checkout this Github repository
+      uses: actions/checkout@v4
+
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # Run a simple Azure CLI command to verify login
-    - name: Azure CLI script
+    - name: Verify login
       uses: azure/cli@v2
       with:
-        azcliversion: latest
         inlineScript: |
           az account show
 
-    # Checkout the repository to access code and configuration files
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    # Set up Terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.11.3
 
-    # Initialize Terraform configuration
-    - name: Terraform Init
+    - name: Initialize and validate Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: terraform init
+      run: terraform init && terraform validate
       working-directory: ./terraform
 
-    # Destory Infrastructure
-    - name: Terraform Destroy
+    - name: Destory Terraform Resources
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -63,7 +58,6 @@ jobs:
         terraform destroy --auto-approve
       working-directory: ./terraform
 
-    # Clean up A record
     - name: Clean up A record
       env:
         USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}

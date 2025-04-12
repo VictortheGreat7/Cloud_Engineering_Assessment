@@ -13,10 +13,10 @@ REGION=eastus
 #     exit 1
 # fi
 
-# if ! az account show &> /dev/null; then
-#     echo "You are not logged into Azure. Please run 'az login' first."
-#     exit 1
-# fi
+if ! az account show &> /dev/null; then
+    echo "You are not logged into Azure. Please run 'az login' first."
+    exit 1
+fi
 
 # Check if container already exists
 echo "Checking if storage account and container already exist..."
