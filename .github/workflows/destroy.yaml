@@ -48,7 +48,19 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: terraform destroy --auto-approve
+        USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
+        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+      run: |
+        cat <<EOF > terraform.tfvars.json
+        {
+          "my_user_object_id": "$USER_OBJECT_ID",
+          "namecom_username": "$USERNAME",
+          "namecom_token": "$TOKEN"
+        }
+        EOF
+        
+        terraform destroy --auto-approve
       working-directory: ./terraform
 
     # Clean up A record
