@@ -179,9 +179,9 @@ jobs:
       run: |
         sleep 120
 
-    - name: Check if API endpoint (api.your.domain/time) and SSL redirection works
+    - name: Check if API endpoint (api.your.domain/time) works
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        curl -I api.$DOMAIN/time
+        curl -v https://api.$DOMAIN/time
 

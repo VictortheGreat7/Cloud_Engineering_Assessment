@@ -115,7 +115,6 @@ resource "kubernetes_ingress_v1" "time_api" {
     name = "time-api-ingress"
     annotations = {
       "cert-manager.io/cluster-issuer"           = "certmanager"
-      "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
     }
   }
 
