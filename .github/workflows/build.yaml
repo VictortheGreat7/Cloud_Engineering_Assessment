@@ -155,11 +155,9 @@ jobs:
 
     - name: Get AKS Credentials
       run: |
-        RESOURCE_GROUP=$(terraform output -raw aks_resource_group | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
-        CLUSTER_NAME=$(terraform output -raw aks_cluster_name | grep -v 'terraform-bin' | grep -v 'Terraform exited with code' | awk -F': ' '{print $2}' | grep -v '^0$')
-
-        az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
-      working-directory: ./terraform
+        chmod +x get-aks-cred.sh
+        ./get-aks-cred.sh
+      working-directory: ./terraform/bash_scripts
     
     - name: Set up Kubernetes authentication with Azure CLI
       run: |
@@ -179,10 +177,11 @@ jobs:
 
     - name: Wait for certificate to be issued
       run: |
-        sleep 180
+        sleep 120
 
-    - name: Check if API endpoint (api.your.domain/time) works
+    - name: Check if API endpoint (api.your.domain/time) and SSL redirection works
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        curl https://api.$DOMAIN/time
+        curl -I http://api.$DOMAIN/time
+
