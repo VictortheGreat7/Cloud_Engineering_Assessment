@@ -183,5 +183,5 @@ jobs:
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        curl -I http://api.$DOMAIN/time
+        curl -I api.$DOMAIN/time
 
