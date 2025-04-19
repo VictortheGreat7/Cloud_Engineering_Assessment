@@ -43,3 +43,9 @@ resource "azurerm_role_assignment" "grafana_admin" {
   role_definition_name = "Grafana Admin"
   principal_id         = azuread_group.time_api_admins.object_id
 }
+
+resource "azurerm_role_assignment" "aks_monitor_metrics_publisher" {
+  scope                = azurerm_monitor_workspace.timeapi_prometheus.id
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = azurerm_kubernetes_cluster.time_api_cluster.identity[0].principal_id
+}
