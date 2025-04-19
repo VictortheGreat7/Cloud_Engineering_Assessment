@@ -28,35 +28,35 @@ resource "azurerm_monitor_action_group" "timeapi_security_team" {
 #   }
 # }
 
-resource "azurerm_monitor_scheduled_query_rules_alert" "unusual_traffic" {
-  name                = "unusual-traffic-alert"
-  resource_group_name = azurerm_resource_group.time_api_rg.name
-  location            = azurerm_resource_group.time_api_rg.location
+# resource "azurerm_monitor_scheduled_query_rules_alert" "unusual_traffic" {
+#   name                = "unusual-traffic-alert"
+#   resource_group_name = azurerm_resource_group.time_api_rg.name
+#   location            = azurerm_resource_group.time_api_rg.location
 
-  action {
-    action_group  = [azurerm_monitor_action_group.timeapi_security_team.id]
-    email_subject = "Unusual Traffic Pattern Detected"
-  }
+#   action {
+#     action_group  = [azurerm_monitor_action_group.timeapi_security_team.id]
+#     email_subject = "Unusual Traffic Pattern Detected"
+#   }
 
-  data_source_id = azurerm_log_analytics_workspace.timeapi_law.id
-  description    = "Alert for unusual traffic pattern"
-  severity       = 2
-  frequency      = 5
-  time_window    = 15
-  query          = <<-QUERY
-      AzureDiagnostics
-      | where Category == "NetworkSecurityGroupFlowEvent"
-      | where action_s == "Deny"
-      | summarize count() by bin(TimeGenerated, 5m), src_ip_s
-      | where count_ > 100
-  QUERY
-  enabled        = true
+#   data_source_id = azurerm_log_analytics_workspace.timeapi_law.id
+#   description    = "Alert for unusual traffic pattern"
+#   severity       = 2
+#   frequency      = 5
+#   time_window    = 15
+#   query          = <<-QUERY
+#       AzureDiagnostics
+#       | where Category == "NetworkSecurityGroupFlowEvent"
+#       | where action_s == "Deny"
+#       | summarize count() by bin(TimeGenerated, 5m), src_ip_s
+#       | where count_ > 100
+#   QUERY
+#   enabled        = true
 
-  trigger {
-    operator  = "GreaterThan"
-    threshold = 100
-  }
-}
+#   trigger {
+#     operator  = "GreaterThan"
+#     threshold = 100
+#   }
+# }
 
 # Create a Prometheus rule group for port 80 traffic monitoring
 resource "azurerm_monitor_alert_prometheus_rule_group" "port_80_alerts" {
