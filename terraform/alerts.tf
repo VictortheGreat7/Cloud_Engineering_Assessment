@@ -92,4 +92,6 @@ resource "azurerm_monitor_alert_prometheus_rule_group" "port_80_alerts" {
       action_group_id = azurerm_monitor_action_group.timeapi_security_team.id
     }
   }
+
+  depends_on = [azurerm_resource_provider_registration.alerts]
 }

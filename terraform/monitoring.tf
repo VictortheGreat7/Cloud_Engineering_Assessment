@@ -9,6 +9,12 @@ resource "azurerm_log_analytics_workspace" "timeapi_law" {
 resource "azurerm_resource_provider_registration" "monitor" {
   name = "Microsoft.Monitor"
 }
+resource "azurerm_resource_provider_registration" "alerts" {
+  name = "Microsoft.AlertsManagement"
+}
+resource "azurerm_resource_provider_registration" "grafana" {
+  name = "Microsoft.Dashboard"
+}
 
 resource "azurerm_monitor_workspace" "timeapi_prometheus" {
   name                = "timeapi-prometheus-workspace"
@@ -76,6 +82,8 @@ resource "azurerm_dashboard_grafana" "timeapi_grafana" {
   azure_monitor_workspace_integrations {
     resource_id = azurerm_monitor_workspace.timeapi_prometheus.id
   }
+
+  depends_on = [azurerm_resource_provider_registration.grafana]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
