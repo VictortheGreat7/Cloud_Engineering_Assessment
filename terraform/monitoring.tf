@@ -11,7 +11,7 @@ resource "azurerm_resource_provider_registration" "monitor" {
 }
 
 resource "azurerm_monitor_workspace" "timeapi_prometheus" {
-  name                = "${azurerm_kubernetes_cluster.time_api_cluster.name}-prometheus-workspace"
+  name                = "timeapi-prometheus-workspace"
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
 
@@ -20,14 +20,14 @@ resource "azurerm_monitor_workspace" "timeapi_prometheus" {
 
 # Connect AKS to Azure Monitor managed Prometheus
 resource "azurerm_monitor_data_collection_endpoint" "timeapi_prometheus_dce" {
-  name                = "${azurerm_kubernetes_cluster.time_api_cluster.name}-prom-dce"
+  name                = "timeapi-prom-dce"
   resource_group_name = azurerm_resource_group.time_api_rg.name
   location            = azurerm_resource_group.time_api_rg.location
   kind                = "Linux"
 }
 
 resource "azurerm_monitor_data_collection_rule" "timeapi_prometheus_dcr" {
-  name                        = "${azurerm_kubernetes_cluster.time_api_cluster.name}-prom-dcr"
+  name                        = "timeapi-prom-dcr"
   resource_group_name         = azurerm_resource_group.time_api_rg.name
   location                    = azurerm_resource_group.time_api_rg.location
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.timeapi_prometheus_dce.id
@@ -54,13 +54,13 @@ resource "azurerm_monitor_data_collection_rule" "timeapi_prometheus_dcr" {
 
 # Associate the data collection rule with the AKS cluster
 resource "azurerm_monitor_data_collection_rule_association" "timeapi_prometheus_dcra" {
-  name                    = "${azurerm_kubernetes_cluster.time_api_cluster.name}-prom-dcra"
+  name                    = "timeapi-prom-dcra"
   target_resource_id      = azurerm_kubernetes_cluster.time_api_cluster.id
   data_collection_rule_id = azurerm_monitor_data_collection_rule.timeapi_prometheus_dcr.id
 }
 
 resource "azurerm_dashboard_grafana" "timeapi_grafana" {
-  name                              = "${azurerm_kubernetes_cluster.time_api_cluster.name}-grafana"
+  name                              = "timeapi-grafana-dashboard"
   location                          = azurerm_resource_group.time_api_rg.location
   resource_group_name               = azurerm_resource_group.time_api_rg.name
   grafana_major_version             = 10
@@ -79,7 +79,7 @@ resource "azurerm_dashboard_grafana" "timeapi_grafana" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
-  name                       = "${azurerm_kubernetes_cluster.time_api_cluster.name}-audit-logs"
+  name                       = "timeapi-audit-logs"
   target_resource_id         = azurerm_kubernetes_cluster.time_api_cluster.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.timeapi_law.id
 
@@ -124,7 +124,7 @@ resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
 }
 
 resource "azurerm_dashboard_grafana_managed_private_endpoint" "timeapi_grafana_prometheus_endpoint" {
-  name                         = "${azurerm_kubernetes_cluster.time_api_cluster.name}-grafana-prometheus-endpoint"
+  name                         = "timeapi-grafana-prometheus-endpoint"
   location                     = azurerm_resource_group.time_api_rg.location
   grafana_id                   = azurerm_dashboard_grafana.timeapi_grafana.id
   private_link_resource_id     = azurerm_monitor_workspace.timeapi_prometheus.id

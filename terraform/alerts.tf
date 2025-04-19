@@ -1,5 +1,5 @@
 resource "azurerm_monitor_action_group" "timeapi_security_team" {
-  name                = "${azurerm_kubernetes_cluster.time_api_cluster.name}-security-team-alerts"
+  name                = "timeapi-security-team-alerts"
   resource_group_name = azurerm_resource_group.time_api_rg.name
   short_name          = "secteam"
 
@@ -10,7 +10,7 @@ resource "azurerm_monitor_action_group" "timeapi_security_team" {
 }
 
 resource "azurerm_monitor_metric_alert" "time_api_high_cpu" {
-  name                = "${azurerm_kubernetes_cluster.time_api_cluster.name}-high-cpu"
+  name                = "timeapi-high-cpu"
   resource_group_name = azurerm_resource_group.time_api_rg.name
   scopes              = [azurerm_kubernetes_cluster.time_api_cluster.id]
   description         = "Alert for high CPU"
