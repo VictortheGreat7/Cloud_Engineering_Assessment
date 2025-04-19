@@ -29,3 +29,17 @@ resource "azurerm_role_assignment" "time_api_admins_rg_access" {
     azurerm_resource_group.time_api_rg
   ]
 }
+
+# Assign Monitoring Reader role to Grafana for the Prometheus workspace
+resource "azurerm_role_assignment" "grafana_prometheus_reader" {
+  scope                = azurerm_monitor_workspace.timeapi_prometheus.id
+  role_definition_name = "Monitoring Reader"
+  principal_id         = azurerm_dashboard_grafana.timeapi_grafana.identity[0].principal_id
+}
+
+# Assign Grafana Admin role to your user/group
+resource "azurerm_role_assignment" "grafana_admin" {
+  scope                = azurerm_dashboard_grafana.timeapi_grafana.id
+  role_definition_name = "Grafana Admin"
+  principal_id         = azuread_group.time_api_admins.object_id
+}

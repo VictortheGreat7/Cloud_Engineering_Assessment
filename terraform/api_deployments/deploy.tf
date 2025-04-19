@@ -114,7 +114,7 @@ resource "kubernetes_ingress_v1" "time_api" {
   metadata {
     name = "time-api-ingress"
     annotations = {
-      "cert-manager.io/cluster-issuer"           = "certmanager"
+      "cert-manager.io/cluster-issuer" = "certmanager"
     }
   }
 

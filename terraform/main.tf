@@ -59,6 +59,13 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
     }
   }
 
+
+
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.timeapi_law.id
+  }
+
+
   depends_on = [azuread_group.time_api_admins, azurerm_subnet_nat_gateway_association.time_api_natgw_subnet_association, azurerm_nat_gateway_public_ip_association.time_api_natgw_public_ip_association]
 
   tags = {
