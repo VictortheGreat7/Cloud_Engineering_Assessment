@@ -19,11 +19,12 @@ resource "azurerm_monitor_metric_alert" "time_api_high_cpu" {
   window_size         = "PT5M"
 
   criteria {
-    metric_namespace = "Insights.Container/nodes"
-    metric_name      = "CPUUsagePercentage"
-    aggregation      = "Average"
-    operator         = "GreaterThan"
-    threshold        = 80
+    metric_name            = "Percentage CPU"
+    metric_namespace       = "Microsoft.ContainerService/managedClusters"
+    aggregation            = "Average"
+    operator               = "GreaterThan"
+    threshold              = 80
+    skip_metric_validation = true
   }
 }
 
