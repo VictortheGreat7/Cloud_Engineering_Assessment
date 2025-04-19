@@ -131,11 +131,10 @@ resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
   }
 }
 
-resource "azurerm_dashboard_grafana_managed_private_endpoint" "timeapi_grafana_prometheus_endpoint" {
-  name                         = "timeapi-grafana-ep"
-  location                     = azurerm_resource_group.time_api_rg.location
-  grafana_id                   = azurerm_dashboard_grafana.timeapi_grafana.id
-  private_link_resource_id     = azurerm_monitor_workspace.timeapi_prometheus.id
-  private_link_resource_region = azurerm_monitor_workspace.timeapi_prometheus.location
-}
-
+# resource "azurerm_dashboard_grafana_managed_private_endpoint" "timeapi_grafana_prometheus_endpoint" {
+#   name                         = "timeapi-grafana-ep"
+#   location                     = azurerm_resource_group.time_api_rg.location
+#   grafana_id                   = azurerm_dashboard_grafana.timeapi_grafana.id
+#   private_link_resource_id     = azurerm_monitor_workspace.timeapi_prometheus.id
+#   private_link_resource_region = azurerm_monitor_workspace.timeapi_prometheus.location
+# }

@@ -9,24 +9,24 @@ resource "azurerm_monitor_action_group" "timeapi_security_team" {
   }
 }
 
-resource "azurerm_monitor_metric_alert" "time_api_high_cpu" {
-  name                = "timeapi-high-cpu"
-  resource_group_name = azurerm_resource_group.time_api_rg.name
-  scopes              = [azurerm_kubernetes_cluster.time_api_cluster.id]
-  description         = "Alert for high CPU"
-  severity            = 2
-  frequency           = "PT1M"
-  window_size         = "PT5M"
+# resource "azurerm_monitor_metric_alert" "time_api_high_cpu" {
+#   name                = "timeapi-high-cpu"
+#   resource_group_name = azurerm_resource_group.time_api_rg.name
+#   scopes              = [azurerm_kubernetes_cluster.time_api_cluster.id]
+#   description         = "Alert for high CPU"
+#   severity            = 2
+#   frequency           = "PT1M"
+#   window_size         = "PT5M"
 
-  criteria {
-    metric_name            = "Percentage CPU"
-    metric_namespace       = "Microsoft.ContainerService/managedClusters"
-    aggregation            = "Average"
-    operator               = "GreaterThan"
-    threshold              = 80
-    skip_metric_validation = true
-  }
-}
+#   criteria {
+#     metric_name            = "Percentage CPU"
+#     metric_namespace       = "Microsoft.ContainerService/managedClusters"
+#     aggregation            = "Average"
+#     operator               = "GreaterThan"
+#     threshold              = 80
+#     skip_metric_validation = true
+#   }
+# }
 
 resource "azurerm_monitor_scheduled_query_rules_alert" "unusual_traffic" {
   name                = "unusual-traffic-alert"
