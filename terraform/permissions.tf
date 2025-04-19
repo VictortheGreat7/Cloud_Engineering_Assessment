@@ -2,7 +2,7 @@
 
 # This creates a new Azure AD group for access to the Time API
 resource "azuread_group" "time_api_admins" {
-  display_name     = "time_api-admins"
+  display_name     = "time_api_admins"
   owners           = [var.my_user_object_id]
   security_enabled = true
 
