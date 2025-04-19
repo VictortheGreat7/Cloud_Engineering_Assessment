@@ -60,7 +60,7 @@ resource "azurerm_monitor_data_collection_rule_association" "timeapi_prometheus_
 }
 
 resource "azurerm_dashboard_grafana" "timeapi_grafana" {
-  name                              = "timeapi-grafana-dashboard"
+  name                              = "timeapi-grafana"
   location                          = azurerm_resource_group.time_api_rg.location
   resource_group_name               = azurerm_resource_group.time_api_rg.name
   grafana_major_version             = 10
@@ -124,7 +124,7 @@ resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
 }
 
 resource "azurerm_dashboard_grafana_managed_private_endpoint" "timeapi_grafana_prometheus_endpoint" {
-  name                         = "timeapi-grafana-prometheus-endpoint"
+  name                         = "timeapi-grafana-ep"
   location                     = azurerm_resource_group.time_api_rg.location
   grafana_id                   = azurerm_dashboard_grafana.timeapi_grafana.id
   private_link_resource_id     = azurerm_monitor_workspace.timeapi_prometheus.id
