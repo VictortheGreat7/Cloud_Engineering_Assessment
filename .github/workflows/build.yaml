@@ -112,7 +112,7 @@ jobs:
 
     - name: Move deployment script to the terraform root directory
       run: |
-        mv deploy.tf ..
+        mv * ..
       working-directory: ./terraform/api_deployments
 
     - name: Initialize and validate Terraform configuration
