@@ -41,9 +41,9 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
           }
         }
         pod_selector {
-          match_labels = {
-            "app.kubernetes.io/name" = "ingress-nginx" # Standard label for NGINX Ingress pods
-          }
+          # match_labels = {
+          #   "app.kubernetes.io/name" = "ingress-nginx" # Standard label for NGINX Ingress pods
+          # }
         }
       }
 
