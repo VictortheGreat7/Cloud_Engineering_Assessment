@@ -37,7 +37,7 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
       from {
         namespace_selector {
           match_labels = {
-            name = "ingress-nginx" # Assuming NGINX Ingress Controller is in 'ingress-nginx' namespace.  Adjust if different.
+            name = "kube-system" # Assuming NGINX Ingress Controller is in 'ingress-nginx' namespace.  Adjust if different.
           }
         }
         pod_selector {
