@@ -72,7 +72,21 @@ resource "kubernetes_network_policy_v1" "allow_dns_egress" {
     }
 
     # Only egress traffic is allowed for this policy to ensure that the time-api pods can perform outbound communication, such as DNS resolution or API calls.
-    policy_types = ["Egress"]
+    policy_types = ["Ingress","Egress"]
+
+    ingress {
+      from {
+        pod_selector {
+          match_labels = {
+            "job-name" = "time-api-loadtest" # Selects the loadtest job pods
+          }
+        }
+      }
+      ports {
+        protocol = "TCP"
+        port     = 5000
+      }
+    }
 
     egress {
       ports {
