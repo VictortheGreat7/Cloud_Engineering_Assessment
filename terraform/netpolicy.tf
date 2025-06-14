@@ -1,95 +1,90 @@
-# # Default Deny Policy for the application namespace
-# resource "kubernetes_network_policy_v1" "default_deny" {
-#   metadata {
-#     name      = "default-deny-all"
-#     namespace = "default"
-#   }
+# Default Deny Policy for the application namespace
+resource "kubernetes_network_policy_v1" "default_deny" {
+  metadata {
+    name      = "default-deny-all"
+    namespace = "default"
+  }
 
-#   spec {
-#     pod_selector {
-#       match_labels = {
-#         app = "time-api"
-#       }
-#     }
+  spec {
+    pod_selector {
+      match_labels = {
+        app = "time-api"
+      }
+    }
 
-#     policy_types = ["Ingress"]
-#   }
+    policy_types = ["Ingress"]
+  }
 
-#   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
-# }
+  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
+}
 
-# resource "kubernetes_network_policy_v1" "allow_dns" {
-#   metadata {
-#     name      = "allow-dns-access"
-#     namespace = "default"
-#   }
+resource "kubernetes_network_policy_v1" "allow_dns" {
+  metadata {
+    name      = "allow-dns-access"
+    namespace = "default"
+  }
 
-#   spec {
-#     pod_selector {
-#       match_labels = {
-#         app = "time-api"
-#       }
-#     }
+  spec {
+    pod_selector {
+      match_labels = {
+        app = "time-api"
+      }
+    }
 
-#     policy_types = ["Ingress"]
+    policy_types = ["Ingress"]
 
-#     ingress {
-#       ports {
-#         protocol = "UDP"
-#         port     = 53
-#       }
-#       ports {
-#         protocol = "TCP"
-#         port     = 53
-#       }
-#     }
-#   }
+    ingress {
+      ports {
+        protocol = "UDP"
+        port     = 53
+      }
+      ports {
+        protocol = "TCP"
+        port     = 53
+      }
+    }
+  }
 
-#   # depends_on = [kubernetes_network_policy_v1.default_deny]
-# }
+  depends_on = [kubernetes_network_policy_v1.default_deny]
+}
 
-# resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
-#   metadata {
-#     name      = "allow-time-api-ingress-from-nginx"
-#     namespace = "default" # Applies to pods in the default namespace
-#   }
+resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
+  metadata {
+    name      = "allow-time-api-ingress-from-nginx"
+    namespace = "default" # Applies to pods in the default namespace
+  }
 
-#   spec {
-#     # Selects the time-api pods to which this policy applies
-#     pod_selector {
-#       match_labels = {
-#         app = "time-api"
-#       }
-#     }
+  spec {
+    # Selects the time-api pods to which this policy applies
+    pod_selector {
+      match_labels = {
+        app = "time-api"
+      }
+    }
 
-#     policy_types = ["Ingress"]
+    policy_types = ["Ingress"]
 
-#     # Defines the allowed incoming traffic
-#     ingress {
-#       # Allow traffic from specific pods
-#       from {
-#         namespace_selector {
-#           match_labels = {
-#             name = "kube-system"
-#           }
-#         }
-#         # pod_selector {
-#         #   match_labels = {
-#         #     "app.kubernetes.io/name"      = "ingress-nginx"
-#         #     "app.kubernetes.io/component" = "controller"
-#         #   }
-#         # }
-#       }
-#       # Allow traffic on specific ports
-#       ports {
-#         protocol = "TCP"
-#         port     = 5000 # The container_port of your time-api deployment
-#       }
-#     }
-#   }
+    # Defines the allowed incoming traffic
+    ingress {
+      # Allow traffic from specific pods
+      from {
+        namespace_selector {
+          match_labels = {
+            name = "kube-system"
+          }
+        }
+        pod_selector {}
+      }
+      # Allow traffic on specific ports
+      ports {
+        protocol = "TCP"
+        port     = 5000 # The container_port of your time-api deployment
+      }
+    }
+  }
 
-#   # depends_on = [kubernetes_network_policy_v1.default_deny]
-# }
+  depends_on = [kubernetes_network_policy_v1.default_deny]
+}
 
 resource "kubernetes_network_policy_v1" "allow_loadtest" {
   metadata {
@@ -123,5 +118,5 @@ resource "kubernetes_network_policy_v1" "allow_loadtest" {
     }
   }
 
-  # depends_on = [kubernetes_network_policy_v1.default_deny]
+  depends_on = [kubernetes_network_policy_v1.default_deny]
 }
