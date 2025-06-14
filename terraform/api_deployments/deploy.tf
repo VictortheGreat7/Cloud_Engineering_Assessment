@@ -46,7 +46,7 @@ resource "kubernetes_deployment_v1" "time_api" {
     }
   }
 
-  depends_on = [module.nginx-controller, helm_release.cert_manager_issuers, kubernetes_network_policy_v1.default_deny, kubernetes_network_policy_v1.allow_nginx_ingress, kubernetes_network_policy_v1.allow_dns_egress]
+  depends_on = [module.nginx-controller, helm_release.cert_manager_issuers]
 }
 
 # This creates a service for the time API deployment, allowing it to be accessed within the cluster.
@@ -106,7 +106,7 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
     active_deadline_seconds = 300
   }
 
-  depends_on = [kubernetes_service_v1.time_api, kubernetes_network_policy_v1.allow_loadtest, kubernetes_network_policy_v1.allow_dns_egress]
+  depends_on = [kubernetes_service_v1.time_api]
 }
 
 # This gives the time API service an external IP address and makes it accessible from outside the cluster.
@@ -145,5 +145,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api, kubernetes_network_policy_v1.allow_nginx_controller, kubernetes_network_policy_v1.allow_certmanager_controller, kubernetes_network_policy_v1.allow_certmanager_webhook, kubernetes_network_policy_v1.allow_namecom_webhook]
+  depends_on = [kubernetes_service_v1.time_api]
 }
