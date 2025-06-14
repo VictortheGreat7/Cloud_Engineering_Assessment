@@ -45,7 +45,7 @@
 #     }
 #   }
 
-#   depends_on = [kubernetes_network_policy_v1.default_deny]
+# #   depends_on = [kubernetes_network_policy_v1.default_deny]
 # }
 
 resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
@@ -88,7 +88,7 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
     }
   }
 
-  depends_on = [kubernetes_network_policy_v1.default_deny]
+  # depends_on = [kubernetes_network_policy_v1.default_deny]
 }
 
 resource "kubernetes_network_policy_v1" "allow_loadtest" {
@@ -123,5 +123,5 @@ resource "kubernetes_network_policy_v1" "allow_loadtest" {
     }
   }
 
-  depends_on = [kubernetes_network_policy_v1.default_deny]
+  # depends_on = [kubernetes_network_policy_v1.default_deny]
 }
