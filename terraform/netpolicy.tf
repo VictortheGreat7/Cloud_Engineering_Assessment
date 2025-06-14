@@ -6,7 +6,11 @@ resource "kubernetes_network_policy_v1" "default_deny" {
   }
 
   spec {
-    pod_selector {}
+    pod_selector {
+      match_labels = {
+        app = "time-api"
+      }
+    }
 
     policy_types = ["Ingress", "Egress"]
   }
