@@ -12,7 +12,7 @@ resource "kubernetes_network_policy_v1" "default_deny" {
       }
     }
 
-    policy_types = ["Ingress", "Egress"]
+    policy_types = ["Ingress"]
   }
 
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
@@ -31,20 +31,9 @@ resource "kubernetes_network_policy_v1" "allow_dns" {
       }
     }
 
-    policy_types = ["Ingress", "Egress"]
+    policy_types = ["Ingress"]
 
     ingress {
-      ports {
-        protocol = "UDP"
-        port     = 53
-      }
-      ports {
-        protocol = "TCP"
-        port     = 53
-      }
-    }
-
-    egress {
       ports {
         protocol = "UDP"
         port     = 53
