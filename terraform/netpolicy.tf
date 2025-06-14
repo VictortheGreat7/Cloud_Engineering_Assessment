@@ -1,22 +1,22 @@
-# Default Deny Policy for the application namespace
-resource "kubernetes_network_policy_v1" "default_deny" {
-  metadata {
-    name      = "default-deny-all"
-    namespace = "default"
-  }
+# # Default Deny Policy for the application namespace
+# resource "kubernetes_network_policy_v1" "default_deny" {
+#   metadata {
+#     name      = "default-deny-all"
+#     namespace = "default"
+#   }
 
-  spec {
-    pod_selector {
-      match_labels = {
-        app = "time-api"
-      }
-    }
+#   spec {
+#     pod_selector {
+#       match_labels = {
+#         app = "time-api"
+#       }
+#     }
 
-    policy_types = ["Ingress"]
-  }
+#     policy_types = ["Ingress"]
+#   }
 
-  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
-}
+#   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
+# }
 
 resource "kubernetes_network_policy_v1" "allow_dns" {
   metadata {
