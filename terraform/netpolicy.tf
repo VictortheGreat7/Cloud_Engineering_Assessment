@@ -84,12 +84,12 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
             name = "kube-system"
           }
         }
-        pod_selector {
-          match_labels = {
-            "app.kubernetes.io/name"      = "ingress-nginx"
-            "app.kubernetes.io/component" = "controller"
-          }
-        }
+        # pod_selector {
+        #   match_labels = {
+        #     "app.kubernetes.io/name"      = "ingress-nginx"
+        #     "app.kubernetes.io/component" = "controller"
+        #   }
+        # }
       }
       # Allow traffic on specific ports
       ports {
