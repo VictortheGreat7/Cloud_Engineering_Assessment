@@ -18,35 +18,35 @@
 #   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 # }
 
-resource "kubernetes_network_policy_v1" "allow_dns" {
-  metadata {
-    name      = "allow-dns-access"
-    namespace = "default"
-  }
+# resource "kubernetes_network_policy_v1" "allow_dns" {
+#   metadata {
+#     name      = "allow-dns-access"
+#     namespace = "default"
+#   }
 
-  spec {
-    pod_selector {
-      match_labels = {
-        app = "time-api"
-      }
-    }
+#   spec {
+#     pod_selector {
+#       match_labels = {
+#         app = "time-api"
+#       }
+#     }
 
-    policy_types = ["Ingress"]
+#     policy_types = ["Ingress"]
 
-    ingress {
-      ports {
-        protocol = "UDP"
-        port     = 53
-      }
-      ports {
-        protocol = "TCP"
-        port     = 53
-      }
-    }
-  }
+#     ingress {
+#       ports {
+#         protocol = "UDP"
+#         port     = 53
+#       }
+#       ports {
+#         protocol = "TCP"
+#         port     = 53
+#       }
+#     }
+#   }
 
-  # depends_on = [kubernetes_network_policy_v1.default_deny]
-}
+#   # depends_on = [kubernetes_network_policy_v1.default_deny]
+# }
 
 # resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
 #   metadata {
