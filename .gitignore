@@ -4,3 +4,4 @@
 *monitoring.tf*
 **/deployments/
 /*.sh
+*.md

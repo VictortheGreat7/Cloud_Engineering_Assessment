@@ -83,7 +83,7 @@ clusterIssuers:
     spec:
       acme:
         email: "greatvictor.anjorin@gmail.com"
-        server: "https://acme-v02.api.letsencrypt.org/directory"
+        server: "https://acme-staging-v02.api.letsencrypt.org/directory"
         privateKeySecretRef:
           name: certmanager
         solvers:
