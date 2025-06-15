@@ -93,7 +93,7 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
       # Allow traffic on specific ports
       ports {
         protocol = "TCP"
-        port     = 5000 # The container_port of your time-api deployment
+        port     = 80 # The container_port of your time-api deployment
       }
     }
   }
