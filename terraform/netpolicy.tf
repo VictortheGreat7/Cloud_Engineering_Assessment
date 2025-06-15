@@ -59,9 +59,9 @@ resource "kubernetes_network_policy_v1" "allow_dns" {
   depends_on = [kubernetes_network_policy_v1.default_deny]
 }
 
-resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
+resource "kubernetes_network_policy_v1" "allow_ingress_to_time_api" {
   metadata {
-    name      = "allow-time-api-ingress-from-nginx"
+    name      = "allow-ingress-to-time-api"
     namespace = "default" # Applies to pods in the default namespace
   }
 
@@ -109,38 +109,3 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
 
   depends_on = [kubernetes_network_policy_v1.default_deny]
 }
-
-# resource "kubernetes_network_policy_v1" "allow_loadtest" {
-#   metadata {
-#     name      = "allow-ingress-from-loadtest"
-#     namespace = "default"
-#   }
-
-#   spec {
-#     pod_selector {
-#       match_labels = {
-#         app = "time-api"
-#       }
-#     }
-
-#     policy_types = ["Ingress"]
-
-#     ingress {
-#       from {
-#         # Select pods created by the time-api-loadtest job.
-#         # Job pods typically get a 'job-name' label derived from the job's metadata.name.
-#         pod_selector {
-#           match_labels = {
-#             "job-name" = "time-api-loadtest"
-#           }
-#         }
-#       }
-#       ports {
-#         protocol = "TCP"
-#         port     = 5000
-#       }
-#     }
-#   }
-
-#   depends_on = [kubernetes_network_policy_v1.default_deny]
-# }
