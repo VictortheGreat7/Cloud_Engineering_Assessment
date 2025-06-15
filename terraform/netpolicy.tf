@@ -31,9 +31,20 @@ resource "kubernetes_network_policy_v1" "allow_dns" {
       }
     }
 
-    policy_types = ["Ingress"]
+    policy_types = ["Ingress", "Egress"]
 
     ingress {
+      ports {
+        protocol = "UDP"
+        port     = 53
+      }
+      ports {
+        protocol = "TCP"
+        port     = 53
+      }
+    }
+
+    egress {
       ports {
         protocol = "UDP"
         port     = 53
@@ -73,12 +84,7 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
             name = "kube-system"
           }
         }
-        pod_selector {
-          match_labels = {
-            "app.kubernetes.io/name"      = "ingress-nginx"
-            "app.kubernetes.io/component" = "controller"
-          }
-        }
+        pod_selector {}
       }
       # Allow traffic on specific ports
       ports {
