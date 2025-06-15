@@ -76,6 +76,7 @@ resource "helm_release" "cert_manager_issuers" {
   repository = "https://charts.adfinis.com"
   namespace  = "cert-manager"
 
+# https://acme-v02.api.letsencrypt.org/directory
   values = [
     <<-EOT
 clusterIssuers:
