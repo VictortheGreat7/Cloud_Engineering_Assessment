@@ -12,7 +12,7 @@ resource "kubernetes_network_policy_v1" "default_deny" {
       }
     }
 
-    policy_types = ["Ingress"]
+    policy_types = ["Ingress", "Egress"]
   }
 
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
@@ -87,6 +87,15 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
         pod_selector {
           match_labels = {
             "app.kubernetes.io/name" = "ingress-nginx"
+          }
+        }
+      }
+      from {
+        # Select pods created by the time-api-loadtest job.
+        # Job pods typically get a 'job-name' label derived from the job's metadata.name.
+        pod_selector {
+          match_labels = {
+            "job-name" = "time-api-loadtest"
           }
         }
       }
