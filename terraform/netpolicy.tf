@@ -81,7 +81,7 @@ resource "kubernetes_network_policy_v1" "allow_nginx_ingress" {
       from {
         namespace_selector {
           match_labels = {
-            name = "kube-system"
+            "kubernetes.io/metadata.name" = "kube-system"
           }
         }
         pod_selector {
