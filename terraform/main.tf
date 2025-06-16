@@ -64,16 +64,9 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
   }
 
   monitor_metrics {
-    # enabled                    = true
-    # kube_state_metrics_enabled = true # Optional: Enable Kube-state-metrics for additional cluster metrics
-
-    # # If you have an existing Prometheus workspace, you can link it here.
-    # prometheus_annotations_enabled = true
-    # prometheus_operator_enabled    = true
     annotations_allowed = null
     labels_allowed      = null
   }
-
 
   depends_on = [azuread_group.time_api_admins, azurerm_subnet_nat_gateway_association.time_api_natgw_subnet_association, azurerm_nat_gateway_public_ip_association.time_api_natgw_public_ip_association]
 

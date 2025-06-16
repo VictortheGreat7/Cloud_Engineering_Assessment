@@ -2,8 +2,6 @@ resource "azurerm_log_analytics_workspace" "timeapi_law" {
   name                = "${azurerm_resource_group.time_api_rg.name}-law"
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
-  #   sku                 = "PerGB2018"
-  #   retention_in_days   = 30
 }
 
 resource "azurerm_monitor_workspace" "monitor_workspace" {
@@ -47,7 +45,7 @@ resource "azurerm_dashboard_grafana" "timeapi_grafana" {
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
 
-  grafana_major_version             = 10
+  grafana_major_version             = 11
   api_key_enabled                   = true
   deterministic_outbound_ip_enabled = true
   public_network_access_enabled     = true # Set to false for private access only
@@ -61,69 +59,3 @@ resource "azurerm_dashboard_grafana" "timeapi_grafana" {
     resource_id = azurerm_monitor_workspace.monitor_workspace.id
   }
 }
-
-# resource "azurerm_dashboard_grafana_workspace_data_source" "prometheus" {
-#   name                       = "${azurerm_resource_group.time_api_rg.name}-prometheus"
-#   grafana_dashboard_id       = azurerm_dashboard_grafana.timeapi_grafana.id
-#   azure_monitor_workspace_id = azurerm_monitor_workspace.monitor_workspace.id
-#   data_source_type           = "prometheus"
-# }
-
-# resource "azurerm_resource_provider_registration" "monitor" {
-#   name = "Microsoft.Monitor"
-# }
-# resource "azurerm_resource_provider_registration" "alerts" {
-#   name = "Microsoft.AlertsManagement"
-# }
-# resource "azurerm_resource_provider_registration" "grafana" {
-#   name = "Microsoft.Dashboard"
-# }
-
-# # Connect AKS to Azure Monitor managed Prometheus
-# resource "azurerm_monitor_data_collection_endpoint" "timeapi_prometheus_dce" {
-#   name                = "timeapi-prom-dce"
-#   resource_group_name = azurerm_resource_group.time_api_rg.name
-#   location            = azurerm_resource_group.time_api_rg.location
-#   kind                = "Linux"
-# }
-
-# resource "azurerm_monitor_data_collection_rule" "timeapi_prometheus_dcr" {
-#   name                        = "timeapi-prom-dcr"
-#   resource_group_name         = azurerm_resource_group.time_api_rg.name
-#   location                    = azurerm_resource_group.time_api_rg.location
-#   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.timeapi_prometheus_dce.id
-
-#   destinations {
-#     monitor_account {
-#       monitor_account_id = azurerm_monitor_workspace.timeapi_prometheus.id
-#       name               = "prometheus-metrics"
-#     }
-#   }
-
-#   data_sources {
-#     prometheus_forwarder {
-#       name    = "aks-prometheus-metrics"
-#       streams = ["Microsoft-PrometheusMetrics"]
-#     }
-#   }
-
-#   data_flow {
-#     destinations = ["prometheus-metrics"]
-#     streams      = ["Microsoft-PrometheusMetrics"]
-#   }
-# }
-
-# # Associate the data collection rule with the AKS cluster
-# resource "azurerm_monitor_data_collection_rule_association" "timeapi_prometheus_dcra" {
-#   name                    = "timeapi-prom-dcra"
-#   target_resource_id      = azurerm_kubernetes_cluster.time_api_cluster.id
-#   data_collection_rule_id = azurerm_monitor_data_collection_rule.timeapi_prometheus_dcr.id
-# }
-
-# resource "azurerm_dashboard_grafana_managed_private_endpoint" "timeapi_grafana_prometheus_endpoint" {
-#   name                         = "timeapi-grafana-ep"
-#   location                     = azurerm_resource_group.time_api_rg.location
-#   grafana_id                   = azurerm_dashboard_grafana.timeapi_grafana.id
-#   private_link_resource_id     = azurerm_monitor_workspace.timeapi_prometheus.id
-#   private_link_resource_region = azurerm_monitor_workspace.timeapi_prometheus.location
-# }
