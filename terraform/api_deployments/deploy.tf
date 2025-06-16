@@ -20,6 +20,12 @@ resource "kubernetes_deployment_v1" "time_api" {
         labels = {
           app = "time-api"
         }
+
+        annotations = {
+          "prometheus.io/scrape" = "true"
+          "prometheus.io/port"   = "5000"
+          "prometheus.io/path"   = "/metrics"
+        }
       }
 
       spec {

@@ -1,7 +1,6 @@
 *.terraform*
 *alerts.tf*
 *dashboard.tf*
-*monitoring.tf*
 **/deployments/
 /*.sh
 *.md

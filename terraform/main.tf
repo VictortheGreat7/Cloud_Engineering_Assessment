@@ -46,7 +46,6 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
     admin_group_object_ids = [azuread_group.time_api_admins.object_id]
   }
 
-
   network_profile {
     network_plugin    = "azure"
     network_policy    = "azure"
@@ -59,12 +58,21 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
     }
   }
 
+  oms_agent {
+    log_analytics_workspace_id      = azurerm_log_analytics_workspace.timeapi_law.id
+    msi_auth_for_monitoring_enabled = true
+  }
 
+  monitor_metrics {
+    # enabled                    = true
+    # kube_state_metrics_enabled = true # Optional: Enable Kube-state-metrics for additional cluster metrics
 
-  # oms_agent {
-  #   log_analytics_workspace_id = azurerm_log_analytics_workspace.timeapi_law.id
-  #   msi_auth_for_monitoring_enabled = true
-  # }
+    # # If you have an existing Prometheus workspace, you can link it here.
+    # prometheus_annotations_enabled = true
+    # prometheus_operator_enabled    = true
+    annotations_allowed            = null
+    labels_allowed                 = null
+  }
 
 
   depends_on = [azuread_group.time_api_admins, azurerm_subnet_nat_gateway_association.time_api_natgw_subnet_association, azurerm_nat_gateway_public_ip_association.time_api_natgw_public_ip_association]
