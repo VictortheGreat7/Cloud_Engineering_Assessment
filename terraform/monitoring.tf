@@ -5,7 +5,7 @@ resource "azurerm_log_analytics_workspace" "timeapi_law" {
 }
 
 resource "azurerm_monitor_workspace" "monitor_workspace" {
-  name                = "${azurerm_resource_group.time_api_rg.name}-monitor-workspace"
+  name                = "timeapi-monitor-workspace"
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
 }
