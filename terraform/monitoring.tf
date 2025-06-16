@@ -37,14 +37,14 @@ resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
     category = "kube-audit"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
     enabled  = true
   }
 }
 
 resource "azurerm_dashboard_grafana" "timeapi_grafana" {
-  name                = "grafana-${azurerm_resource_group.time_api_rg.name}"
+  name                = "timeapi-grafana"
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
 

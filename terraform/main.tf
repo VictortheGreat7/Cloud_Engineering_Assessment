@@ -70,8 +70,8 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
     # # If you have an existing Prometheus workspace, you can link it here.
     # prometheus_annotations_enabled = true
     # prometheus_operator_enabled    = true
-    annotations_allowed            = null
-    labels_allowed                 = null
+    annotations_allowed = null
+    labels_allowed      = null
   }
 
 
