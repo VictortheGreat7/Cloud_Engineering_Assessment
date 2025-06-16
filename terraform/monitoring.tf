@@ -39,7 +39,6 @@ resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
 
   enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 
