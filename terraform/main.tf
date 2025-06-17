@@ -68,6 +68,9 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
     labels_allowed      = null
   }
 
+  cost_analysis_enabled = true
+  sku_tier              = "Standard"
+
   depends_on = [azuread_group.time_api_admins, azurerm_subnet_nat_gateway_association.time_api_natgw_subnet_association, azurerm_nat_gateway_public_ip_association.time_api_natgw_public_ip_association]
 
   tags = {
