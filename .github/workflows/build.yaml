@@ -108,80 +108,79 @@ jobs:
         terraform apply --auto-approve
       working-directory: ./terraform
 
-# Deploy API to AKS
+# # Deploy API to AKS
 
-    - name: Move deployment script to the terraform root directory
-      run: |
-        mv * ..
-      working-directory: ./terraform/api_deployments
+#     - name: Move deployment script to the terraform root directory
+#       run: |
+#         mv * ..
+#       working-directory: ./terraform/api_deployments
 
-    - name: Initialize and validate Terraform configuration
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: terraform init && terraform validate
-      working-directory: ./terraform
+#     - name: Initialize and validate Terraform configuration
+#       env:
+#         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+#         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+#         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+#         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+#       run: terraform init && terraform validate
+#       working-directory: ./terraform
 
-    - name: Apply Terraform configuration
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
-        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-      run: |
-        cat <<EOF > terraform.tfvars.json
-        {
-          "my_user_object_id": "$USER_OBJECT_ID",
-          "namecom_username": "$USERNAME",
-          "namecom_token": "$TOKEN"
-        }
-        EOF
+#     - name: Apply Terraform configuration
+#       env:
+#         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+#         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+#         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+#         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+#         USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
+#         USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+#         TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+#       run: |
+#         cat <<EOF > terraform.tfvars.json
+#         {
+#           "my_user_object_id": "$USER_OBJECT_ID",
+#           "namecom_username": "$USERNAME",
+#           "namecom_token": "$TOKEN"
+#         }
+#         EOF
 
-        terraform apply --auto-approve
-      working-directory: ./terraform
+#         terraform apply --auto-approve
+#       working-directory: ./terraform
 
-# Configure domain where API endpoint will be accessible
+# # Configure domain where API endpoint will be accessible
 
-    - name: Setup kubectl
-      uses: azure/setup-kubectl@v3
+#     - name: Setup kubectl
+#       uses: azure/setup-kubectl@v3
 
-    - name: Install Kubelogin
-      run: sudo az aks install-cli
+#     - name: Install Kubelogin
+#       run: sudo az aks install-cli
 
-    - name: Get AKS Credentials
-      run: |
-        chmod +x bash_scripts/get-aks-cred.sh
-        ./bash_scripts/get-aks-cred.sh
-      working-directory: ./terraform
+#     - name: Get AKS Credentials
+#       run: |
+#         chmod +x bash_scripts/get-aks-cred.sh
+#         ./bash_scripts/get-aks-cred.sh
+#       working-directory: ./terraform
     
-    - name: Set up Kubernetes authentication with Azure CLI
-      run: |
-        kubelogin convert-kubeconfig -l azurecli
+#     - name: Set up Kubernetes authentication with Azure CLI
+#       run: |
+#         kubelogin convert-kubeconfig -l azurecli
 
-    - name: Add A record
-      env:
-        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-        DOMAIN: ${{ secrets.DOMAIN }}
-      run: |
-        chmod +x up_A_record.sh
-        ./up_A_record.sh
-      working-directory: ./terraform/bash_scripts
+#     - name: Add A record
+#       env:
+#         USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+#         TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+#         DOMAIN: ${{ secrets.DOMAIN }}
+#       run: |
+#         chmod +x up_A_record.sh
+#         ./up_A_record.sh
+#       working-directory: ./terraform/bash_scripts
 
-# Test API endpoint
+# # Test API endpoint
 
-    - name: Wait for certificate to be issued
-      run: |
-        sleep 120
+#     - name: Wait for certificate to be issued
+#       run: |
+#         sleep 120
 
-    - name: Check if API endpoint (api.your.domain/time) works
-      env:
-        DOMAIN: ${{ secrets.DOMAIN }}
-      run: |
-        curl -v https://api.$DOMAIN/time
-
+#     - name: Check if API endpoint (api.your.domain/time) works
+#       env:
+#         DOMAIN: ${{ secrets.DOMAIN }}
+#       run: |
+#         curl -v https://api.$DOMAIN/time

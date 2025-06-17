@@ -5,9 +5,54 @@ resource "azurerm_log_analytics_workspace" "timeapi_law" {
 }
 
 resource "azurerm_monitor_workspace" "monitor_workspace" {
-  name                = "timeapi-monitor-workspace"
+  name                = "timeapi-prometheus-monitor-workspace"
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
+}
+
+# Data Collection Endpoint
+resource "azurerm_monitor_data_collection_endpoint" "time_api_dce" {
+  name                = "time-api-dce"
+  resource_group_name = azurerm_resource_group.time_api_rg.name
+  location            = azurerm_resource_group.time_api_rg.location
+  kind                = "Linux"
+}
+
+# Data Collection Rule for Prometheus
+resource "azurerm_monitor_data_collection_rule" "time_api_dcr" {
+  name                        = "time-api-prometheus-dcr"
+  resource_group_name         = azurerm_resource_group.time_api_rg.name
+  location                    = azurerm_resource_group.time_api_rg.location
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.time_api_dce.id
+
+  destinations {
+    monitor_account {
+      monitor_account_id = azurerm_monitor_workspace.monitor_workspace.id
+      name               = "MonitoringAccount1"
+    }
+  }
+
+  data_flow {
+    streams      = ["Microsoft-PrometheusMetrics"]
+    destinations = ["MonitoringAccount1"]
+  }
+
+  data_sources {
+    prometheus_forwarder {
+      streams = ["Microsoft-PrometheusMetrics"]
+      name    = "PrometheusDataSource"
+    }
+  }
+
+  description = "Data collection rule for Prometheus metrics"
+}
+
+# Data Collection Rule Association with AKS cluster
+resource "azurerm_monitor_data_collection_rule_association" "time_api_dcra" {
+  name                    = "time-api-dcra"
+  target_resource_id      = azurerm_kubernetes_cluster.time_api_cluster.id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.time_api_dcr.id
+  description             = "Association between AKS cluster and Prometheus DCR"
 }
 
 resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {

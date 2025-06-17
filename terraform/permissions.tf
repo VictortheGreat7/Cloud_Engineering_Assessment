@@ -37,12 +37,12 @@ resource "azurerm_role_assignment" "grafana_admin" {
   principal_id         = azuread_group.time_api_admins.object_id
 }
 
-# # Assign Monitoring Reader role to Grafana for the Prometheus workspace
-# resource "azurerm_role_assignment" "grafana_prometheus_reader" {
-#   scope                = azurerm_monitor_workspace.timeapi_prometheus.id
-#   role_definition_name = "Monitoring Reader"
-#   principal_id         = azurerm_dashboard_grafana.timeapi_grafana.identity[0].principal_id
-# }
+# Assign Monitoring Reader role to Grafana for the Prometheus workspace
+resource "azurerm_role_assignment" "grafana_prometheus_reader" {
+  scope                = azurerm_monitor_workspace.monitor_workspace.id
+  role_definition_name = "Monitoring Reader"
+  principal_id         = azurerm_dashboard_grafana.timeapi_grafana.identity[0].principal_id
+}
 
 # resource "azurerm_role_assignment" "aks_monitor_metrics_publisher" {
 #   scope                = azurerm_monitor_workspace.timeapi_prometheus.id
