@@ -1,9 +1,19 @@
-# This script defines the instructions for the deployment of the time API application to the Azure Kubernetes Service (AKS) cluster.
+# This script defines the instructions for the deployment of the time API microservice to the Azure Kubernetes Service (AKS) cluster.
 
-# This deploys the time API application to the Kubernetes cluster
+# This resource creates a Kubernetes namespace for the time API microservice.
+resource "kubernetes_namespace_v1" "time_api" {
+  metadata {
+    name = "time-api"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
+}
+
+# This deploys the time API microservice to the Kubernetes cluster
 resource "kubernetes_deployment_v1" "time_api" {
   metadata {
     name = "time-api"
+    namespace = "time-api"
   }
 
   spec {
@@ -46,14 +56,14 @@ resource "kubernetes_deployment_v1" "time_api" {
     }
   }
 
-  depends_on = [module.nginx-controller, helm_release.cert_manager_issuers]
+  depends_on = [module.nginx-controller, helm_release.cert_manager_issuers, kubernetes_namespace_v1.time_api]
 }
 
 # This creates a service for the time API deployment, allowing it to be accessed within the cluster.
-# The service is of type ClusterIP, which means it will only be accessible from within the cluster.
 resource "kubernetes_service_v1" "time_api" {
   metadata {
     name = "time-api-service"
+    namespace = "time-api"
   }
 
   spec {
@@ -74,10 +84,10 @@ resource "kubernetes_service_v1" "time_api" {
 }
 
 # This tests the time API by sending 50 requests to the service and checking if the response is successful.
-# It's a simple load test to ensure the service is up and running.
 resource "kubernetes_job_v1" "time_api_loadtest" {
   metadata {
     name = "time-api-loadtest"
+    namespace = "time-api"
   }
 
   spec {
@@ -92,7 +102,7 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
           command = ["/bin/sh", "-c"]
           args = [<<-EOF
             for i in $(seq 1 50); do 
-              wget -q -O- http://time-api-service.default.svc.cluster.local:80/time && 
+              wget -q -O- http://time-api-service.time-api.svc.cluster.local:80/time && 
               echo "Request $i successful"; 
               sleep 0.1; 
             done
@@ -109,10 +119,11 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
   depends_on = [kubernetes_service_v1.time_api]
 }
 
-# This gives the time API service an external IP address and makes it accessible from outside the cluster.
+# This makes the API service accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
   metadata {
     name = "time-api-ingress"
+    namespace = "time-api"
     annotations = {
       "cert-manager.io/cluster-issuer" = "certmanager"
     }

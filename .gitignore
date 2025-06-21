@@ -1,6 +1,6 @@
 *.terraform*
 *alerts.tf*
 *dashboard.tf*
-**/deployments/
+**/prev_attempts/
 /*.sh
 *.md

@@ -9,8 +9,7 @@ jobs:
 
     steps:
 
-# Destroy Terraform Resources
-
+    # Destroy Terraform Resources
     - name: Checkout this Github repository
       uses: actions/checkout@v4
 
@@ -58,6 +57,7 @@ jobs:
         terraform destroy --auto-approve
       working-directory: ./terraform
 
+    # Delete A record from domain
     - name: Clean up A record
       env:
         USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}

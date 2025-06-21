@@ -2,7 +2,7 @@
 resource "kubernetes_network_policy_v1" "default_deny" {
   metadata {
     name      = "default-deny-all"
-    namespace = "default"
+    namespace = "time-api"
   }
 
   spec {
@@ -21,7 +21,7 @@ resource "kubernetes_network_policy_v1" "default_deny" {
 resource "kubernetes_network_policy_v1" "allow_dns" {
   metadata {
     name      = "allow-dns-access"
-    namespace = "default"
+    namespace = "time-api"
   }
 
   spec {
@@ -62,7 +62,7 @@ resource "kubernetes_network_policy_v1" "allow_dns" {
 resource "kubernetes_network_policy_v1" "allow_ingress_to_time_api" {
   metadata {
     name      = "allow-ingress-to-time-api"
-    namespace = "default" # Applies to pods in the default namespace
+    namespace = "time-api"
   }
 
   spec {
@@ -81,7 +81,7 @@ resource "kubernetes_network_policy_v1" "allow_ingress_to_time_api" {
       from {
         namespace_selector {
           match_labels = {
-            "kubernetes.io/metadata.name" = "kube-system"
+            "kubernetes.io/metadata.name" = "nginx-ingress"
           }
         }
         pod_selector {
