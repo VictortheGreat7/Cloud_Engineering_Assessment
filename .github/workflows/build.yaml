@@ -14,7 +14,7 @@ jobs:
     steps:
 
     # Checkout the needed repositories
-    - name: Checkout this Github repository
+    - name: Checkout current Github repository
       uses: actions/checkout@v4
 
     - name: Checkout Name.com webhook Github repository
