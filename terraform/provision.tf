@@ -105,3 +105,12 @@ EOT
 
   depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
 }
+
+# This resource creates a Kubernetes namespace for the time API microservice.
+resource "kubernetes_namespace_v1" "time_api" {
+  metadata {
+    name = "time-api"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
+}

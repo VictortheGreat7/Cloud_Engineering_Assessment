@@ -1,14 +1,5 @@
 # This script defines the instructions for the deployment of the time API microservice to the Azure Kubernetes Service (AKS) cluster.
 
-# This resource creates a Kubernetes namespace for the time API microservice.
-resource "kubernetes_namespace_v1" "time_api" {
-  metadata {
-    name = "time-api"
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
-}
-
 # This deploys the time API microservice to the Kubernetes cluster
 resource "kubernetes_deployment_v1" "time_api" {
   metadata {
