@@ -69,6 +69,7 @@ jobs:
       run: |
         chmod +x pre-apply.sh
         ./pre-apply.sh
+        terraform -v
       working-directory: ./terraform/bash_scripts
 
     - name: Initialize and validate Terraform configuration
