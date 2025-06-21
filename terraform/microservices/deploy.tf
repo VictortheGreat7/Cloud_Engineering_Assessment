@@ -12,7 +12,7 @@ resource "kubernetes_namespace_v1" "time_api" {
 # This deploys the time API microservice to the Kubernetes cluster
 resource "kubernetes_deployment_v1" "time_api" {
   metadata {
-    name = "time-api"
+    name      = "time-api"
     namespace = "time-api"
   }
 
@@ -62,7 +62,7 @@ resource "kubernetes_deployment_v1" "time_api" {
 # This creates a service for the time API deployment, allowing it to be accessed within the cluster.
 resource "kubernetes_service_v1" "time_api" {
   metadata {
-    name = "time-api-service"
+    name      = "time-api-service"
     namespace = "time-api"
   }
 
@@ -86,7 +86,7 @@ resource "kubernetes_service_v1" "time_api" {
 # This tests the time API by sending 50 requests to the service and checking if the response is successful.
 resource "kubernetes_job_v1" "time_api_loadtest" {
   metadata {
-    name = "time-api-loadtest"
+    name      = "time-api-loadtest"
     namespace = "time-api"
   }
 
@@ -122,7 +122,7 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
 # This makes the API service accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
   metadata {
-    name = "time-api-ingress"
+    name      = "time-api-ingress"
     namespace = "time-api"
     annotations = {
       "cert-manager.io/cluster-issuer" = "certmanager"
