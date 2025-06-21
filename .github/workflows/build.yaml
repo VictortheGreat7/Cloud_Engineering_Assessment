@@ -58,7 +58,7 @@ jobs:
 
     # Provision cloud infrastructure
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
 
     - name: Login to Microsoft Azure CLI
       uses: azure/login@v2
@@ -140,7 +140,7 @@ jobs:
 
     # Update domain DNS records with microservice IP address
     - name: Setup kubectl
-      uses: azure/setup-kubectl@v3
+      uses: azure/setup-kubectl@v4
 
     - name: Install Kubelogin
       run: sudo az aks install-cli
