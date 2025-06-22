@@ -1,5 +1,14 @@
 # This script provisions the Kubernetes resources needed for the time API application.
 
+# This resource creates a Kubernetes namespace for the time API microservice.
+resource "kubernetes_namespace_v1" "time_api" {
+  metadata {
+    name = "time-api"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
+}
+
 # This resource creates a ConfigMap in the Kubernetes cluster.
 # A ConfigMap is used to store non-confidential data in key-value pairs.
 # ConfigMaps are used to decouple environment-specific configuration from the container images, allowing for more flexible deployments.
@@ -7,6 +16,7 @@
 resource "kubernetes_config_map_v1" "time_api_config" {
   metadata {
     name = "time-api-config"
+    namespace = "time-api"
   }
 
   data = {
@@ -106,11 +116,3 @@ EOT
   depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
 }
 
-# This resource creates a Kubernetes namespace for the time API microservice.
-resource "kubernetes_namespace_v1" "time_api" {
-  metadata {
-    name = "time-api"
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
-}
