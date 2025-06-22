@@ -91,6 +91,11 @@ resource "kubernetes_network_policy_v1" "allow_ingress_to_time_api" {
         }
       }
       from {
+        namespace_selector {
+          match_labels = {
+            "kubernetes.io/metadata.name" = "time-api"
+          }
+        }
         # Select pods created by the time-api-loadtest job.
         # Job pods typically get a 'job-name' label derived from the job's metadata.name.
         pod_selector {
