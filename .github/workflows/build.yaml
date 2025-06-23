@@ -147,8 +147,6 @@ jobs:
 
     - name: Get AKS Credentials
       run: |
-        terraform output -raw aks_resource_group
-        terraform output -raw aks_cluster_name
         chmod +x bash_scripts/get-aks-cred.sh
         ./bash_scripts/get-aks-cred.sh
       working-directory: ./terraform
