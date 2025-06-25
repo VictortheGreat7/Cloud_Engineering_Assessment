@@ -138,40 +138,40 @@ jobs:
         terraform apply --auto-approve
       working-directory: ./terraform
 
-    # Update domain DNS records with microservice IP address
-    - name: Setup kubectl
-      uses: azure/setup-kubectl@v4
+    # # Update domain DNS records with microservice IP address
+    # - name: Setup kubectl
+    #   uses: azure/setup-kubectl@v4
 
-    - name: Install Kubelogin
-      run: sudo az aks install-cli
+    # - name: Install Kubelogin
+    #   run: sudo az aks install-cli
 
-    - name: Get AKS Credentials
-      run: |
-        chmod +x bash_scripts/get-aks-cred.sh
-        ./bash_scripts/get-aks-cred.sh
-      working-directory: ./terraform
+    # - name: Get AKS Credentials
+    #   run: |
+    #     chmod +x bash_scripts/get-aks-cred.sh
+    #     ./bash_scripts/get-aks-cred.sh
+    #   working-directory: ./terraform
     
-    - name: Set up Kubernetes authentication with Azure CLI
-      run: |
-        kubelogin convert-kubeconfig -l azurecli
+    # - name: Set up Kubernetes authentication with Azure CLI
+    #   run: |
+    #     kubelogin convert-kubeconfig -l azurecli
 
-    - name: Add A record
-      env:
-        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-        DOMAIN: ${{ secrets.DOMAIN }}
-      run: |
-        chmod +x up_A_record.sh
-        ./up_A_record.sh
-      working-directory: ./terraform/bash_scripts
+    # - name: Add A record
+    #   env:
+    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+    #     DOMAIN: ${{ secrets.DOMAIN }}
+    #   run: |
+    #     chmod +x up_A_record.sh
+    #     ./up_A_record.sh
+    #   working-directory: ./terraform/bash_scripts
 
-    # Test microservice URL
-    - name: Wait for certificate to be issued
-      run: |
-        sleep 120
+    # # Test microservice URL
+    # - name: Wait for certificate to be issued
+    #   run: |
+    #     sleep 120
 
-    - name: Check if microservice URL (api.your.domain/time) works
-      env:
-        DOMAIN: ${{ secrets.DOMAIN }}
-      run: |
-        curl -v https://api.$DOMAIN/time
+    # - name: Check if microservice URL (api.your.domain/time) works
+    #   env:
+    #     DOMAIN: ${{ secrets.DOMAIN }}
+    #   run: |
+    #     curl -v https://api.$DOMAIN/time
