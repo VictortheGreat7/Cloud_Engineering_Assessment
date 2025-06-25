@@ -151,6 +151,24 @@ resource "kubernetes_ingress_v1" "time_api" {
         }
       }
     }
+
+    # Default rule (no host)
+    rule {
+      http {
+        path {
+          path      = "/time"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = kubernetes_service_v1.time_api.metadata[0].name
+              port {
+                number = kubernetes_service_v1.time_api.spec[0].port[0].port
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   depends_on = [kubernetes_service_v1.time_api, time_sleep.wait_for_nginx]
