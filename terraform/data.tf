@@ -33,3 +33,11 @@ data "kubernetes_endpoints_v1" "nginx_admission_webhook" {
   }
   depends_on = [module.nginx-controller]
 }
+
+data "kubernetes_service" "nginx_admission_webhook" {
+  metadata {
+    name      = "ingress-nginx-controller-admission"
+    namespace = "nginx-ingress"
+  }
+  depends_on = [module.nginx-controller]
+}
