@@ -110,6 +110,12 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
   depends_on = [kubernetes_service_v1.time_api]
 }
 
+resource "time_sleep" "wait_for_nginx" {
+  create_duration = "120s"  # Wait 2 minutes
+
+  depends_on = [module.nginx-controller]
+}
+
 # This makes the API service accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
   metadata {
@@ -147,5 +153,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api, data.kubernetes_endpoints_v1.nginx_admission_webhook, data.kubernetes_service.nginx_admission_webhook, data.kubernetes_service.nginx_ingress]
+  depends_on = [kubernetes_service_v1.time_api, time_sleep.wait_for_nginx]
 }
