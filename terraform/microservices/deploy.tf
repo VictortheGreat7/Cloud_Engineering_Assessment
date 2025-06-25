@@ -147,5 +147,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api]
+  depends_on = [kubernetes_service_v1.time_api, data.kubernetes_endpoints_v1.nginx_admission_webhook]
 }

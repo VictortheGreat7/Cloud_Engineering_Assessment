@@ -51,13 +51,13 @@ jobs:
         terraform destroy --auto-approve
       working-directory: ./terraform
 
-    # Delete A record from domain
-    - name: Clean up A record
-      env:
-        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-        DOMAIN: ${{ secrets.DOMAIN }}
-      run: |
-        chmod +x del_A_record.sh
-        ./del_A_record.sh
-      working-directory: ./terraform/bash_scripts
+    # # Delete A record from domain
+    # - name: Clean up A record
+    #   env:
+    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+    #     DOMAIN: ${{ secrets.DOMAIN }}
+    #   run: |
+    #     chmod +x del_A_record.sh
+    #     ./del_A_record.sh
+    #   working-directory: ./terraform/bash_scripts

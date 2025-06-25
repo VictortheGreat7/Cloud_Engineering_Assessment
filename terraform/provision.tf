@@ -15,7 +15,7 @@ resource "kubernetes_namespace_v1" "time_api" {
 # The time zone is set to UTC, but this can be changed as needed.
 resource "kubernetes_config_map_v1" "time_api_config" {
   metadata {
-    name = "time-api-config"
+    name      = "time-api-config"
     namespace = "time-api"
   }
 

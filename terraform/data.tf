@@ -25,3 +25,11 @@ data "kubernetes_service" "nginx_ingress" {
   }
   depends_on = [module.nginx-controller]
 }
+
+data "kubernetes_endpoints_v1" "nginx_admission_webhook" {
+  metadata {
+    name      = "ingress-nginx-controller-admission" # This is the one that's failing
+    namespace = "nginx-ingress"
+  }
+  depends_on = [module.nginx-controller]
+}
