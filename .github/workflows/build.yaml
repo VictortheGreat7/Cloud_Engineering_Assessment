@@ -17,11 +17,11 @@ jobs:
     - name: Checkout current Github repository
       uses: actions/checkout@v4
 
-    - name: Checkout Name.com webhook Github repository
-      uses: actions/checkout@v4
-      with:
-        repository: imgrant/cert-manager-webhook-namecom
-        path: webhook
+    # - name: Checkout Name.com webhook Github repository
+    #   uses: actions/checkout@v4
+    #   with:
+    #     repository: imgrant/cert-manager-webhook-namecom
+    #     path: webhook
 
     # Build, test, and push Docker image
     - name: Set up Docker Buildx
@@ -69,38 +69,37 @@ jobs:
       run: |
         chmod +x pre-apply.sh
         ./pre-apply.sh
-        terraform -v
       working-directory: ./terraform/bash_scripts
 
-    - name: Initialize and validate Terraform configuration
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: terraform init && terraform validate
-      working-directory: ./terraform
+    # - name: Initialize and validate Terraform configuration
+    #   env:
+    #     ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+    #     ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+    #     ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+    #     ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    #   run: terraform init && terraform validate
+    #   working-directory: ./terraform
 
-    - name: Apply Terraform configuration
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
-        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-      run: |
-        cat <<EOF > terraform.tfvars.json
-        {
-          "my_user_object_id": "$USER_OBJECT_ID",
-          "namecom_username": "$USERNAME",
-          "namecom_token": "$TOKEN"
-        }
-        EOF
+    # - name: Apply Terraform configuration
+    #   env:
+    #     ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+    #     ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+    #     ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+    #     ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    #     USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
+    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
+    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
+    #   run: |
+    #     cat <<EOF > terraform.tfvars.json
+    #     {
+    #       "my_user_object_id": "$USER_OBJECT_ID",
+    #       "namecom_username": "$USERNAME",
+    #       "namecom_token": "$TOKEN"
+    #     }
+    #     EOF
 
-        terraform apply --auto-approve
-      working-directory: ./terraform
+    #     terraform apply --auto-approve
+    #   working-directory: ./terraform
 
     # Deploy microservice to provisioned infrastructure
     - name: Move microservice deployment script to the terraform root directory
@@ -175,3 +174,8 @@ jobs:
     #     DOMAIN: ${{ secrets.DOMAIN }}
     #   run: |
     #     curl -v https://api.$DOMAIN/time
+
+    - name: Check if microservice URL (api.your.domain/time) works
+      run: |
+        DOMAIN=$(terraform output -raw ingress_ip)
+        curl -v https://api.$DOMAIN/time

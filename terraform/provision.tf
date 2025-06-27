@@ -57,62 +57,61 @@ resource "helm_release" "cert_manager" {
   depends_on = [module.nginx-controller]
 }
 
-resource "helm_release" "namecom_webhook" {
-  name       = "namecom-webhook"
-  repository = "../webhook/deploy"
-  chart      = "cert-manager-webhook-namecom"
-  namespace  = "cert-manager"
+# resource "helm_release" "namecom_webhook" {
+#   name       = "namecom-webhook"
+#   repository = "../webhook/deploy"
+#   chart      = "cert-manager-webhook-namecom"
+#   namespace  = "cert-manager"
 
-  depends_on = [helm_release.cert_manager]
-}
+#   depends_on = [helm_release.cert_manager]
+# }
 
 
-resource "kubernetes_secret_v1" "namecom_api_token" {
-  metadata {
-    name      = "namedotcom-credentials"
-    namespace = "cert-manager"
-  }
+# resource "kubernetes_secret_v1" "namecom_api_token" {
+#   metadata {
+#     name      = "namedotcom-credentials"
+#     namespace = "cert-manager"
+#   }
 
-  data = {
-    api-token = var.namecom_token
-  }
+#   data = {
+#     api-token = var.namecom_token
+#   }
 
-  type = "Opaque"
+#   type = "Opaque"
 
-  depends_on = [helm_release.namecom_webhook]
-}
+#   depends_on = [helm_release.namecom_webhook]
+# }
 
-resource "helm_release" "cert_manager_issuers" {
-  chart      = "cert-manager-issuers"
-  name       = "cert-manager-issuers"
-  version    = "0.3.0"
-  repository = "https://charts.adfinis.com"
-  namespace  = "cert-manager"
+# resource "helm_release" "cert_manager_issuers" {
+#   chart      = "cert-manager-issuers"
+#   name       = "cert-manager-issuers"
+#   version    = "0.3.0"
+#   repository = "https://charts.adfinis.com"
+#   namespace  = "cert-manager"
 
-  # https://acme-staging-v02.api.letsencrypt.org/directory
-  values = [
-    <<-EOT
-clusterIssuers:
-  - name: certmanager
-    spec:
-      acme:
-        email: "greatvictor.anjorin@gmail.com"
-        server: "https://acme-v02.api.letsencrypt.org/directory"
-        privateKeySecretRef:
-          name: certmanager
-        solvers:
-          - dns01:
-              webhook:
-                groupName: acme.name.com
-                solverName: namedotcom
-                config:
-                  username: "${var.namecom_username}"
-                  apitokensecret:
-                    name: namedotcom-credentials
-                    key: api-token               
-EOT
-  ]
+#   # https://acme-staging-v02.api.letsencrypt.org/directory
+#   values = [
+#     <<-EOT
+# clusterIssuers:
+#   - name: certmanager
+#     spec:
+#       acme:
+#         email: "greatvictor.anjorin@gmail.com"
+#         server: "https://acme-v02.api.letsencrypt.org/directory"
+#         privateKeySecretRef:
+#           name: certmanager
+#         solvers:
+#           - dns01:
+#               webhook:
+#                 groupName: acme.name.com
+#                 solverName: namedotcom
+#                 config:
+#                   username: "${var.namecom_username}"
+#                   apitokensecret:
+#                     name: namedotcom-credentials
+#                     key: api-token               
+# EOT
+#   ]
 
-  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
-}
-
+#   depends_on = [helm_release.cert_manager, kubernetes_secret_v1.namecom_api_token]
+# }
