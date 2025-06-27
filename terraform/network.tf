@@ -34,6 +34,7 @@ resource "azurerm_network_security_group" "time_api_nsg" {
     destination_address_prefix = "*"
   }
 
+  # My domain expired so I 'm using the public IP for now
   security_rule {
     name                       = "allow-http-access"
     priority                   = 103
