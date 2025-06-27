@@ -64,6 +64,38 @@ jobs:
         chmod +x pre-apply.sh
         ./pre-apply.sh
       working-directory: ./terraform/bash_scripts
+
+    - name: Initialize and validate Terraform configuration
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init && terraform validate
+      working-directory: ./terraform
+
+    - name: Apply Terraform configuration
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
+      run: |
+        cat <<EOF > terraform.tfvars.json
+        {
+          "my_user_object_id": "$USER_OBJECT_ID"
+        }
+        EOF
+
+        terraform apply --auto-approve
+      working-directory: ./terraform
+
+    # Deploy microservice to provisioned infrastructure
+    - name: Move microservice deployment script to the terraform root directory
+      run: |
+        mv * ..
+      working-directory: ./terraform/microservices
     - name: Initialize and validate Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
