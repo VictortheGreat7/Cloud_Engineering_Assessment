@@ -2,9 +2,9 @@ name: Provision Infrastructure and Deploy API
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -13,15 +13,9 @@ jobs:
 
     steps:
 
-    # Checkout the needed repositories
+    # Checkout the repository on the runner
     - name: Checkout current Github repository
       uses: actions/checkout@v4
-
-    # - name: Checkout Name.com webhook Github repository
-    #   uses: actions/checkout@v4
-    #   with:
-    #     repository: imgrant/cert-manager-webhook-namecom
-    #     path: webhook
 
     # Build, test, and push Docker image
     - name: Set up Docker Buildx
@@ -56,7 +50,7 @@ jobs:
         docker push victorthegreat7/time-api:${{ github.sha }}
         docker push victorthegreat7/time-api:latest
 
-    # Provision cloud infrastructure
+    # Provision cloud infrastructure and deploy microservice to provisioned infrastructure
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
@@ -70,43 +64,6 @@ jobs:
         chmod +x pre-apply.sh
         ./pre-apply.sh
       working-directory: ./terraform/bash_scripts
-
-    # - name: Initialize and validate Terraform configuration
-    #   env:
-    #     ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-    #     ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-    #     ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-    #     ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-    #   run: terraform init && terraform validate
-    #   working-directory: ./terraform
-
-    # - name: Apply Terraform configuration
-    #   env:
-    #     ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-    #     ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-    #     ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-    #     ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-    #     USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
-    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-    #   run: |
-    #     cat <<EOF > terraform.tfvars.json
-    #     {
-    #       "my_user_object_id": "$USER_OBJECT_ID",
-    #       "namecom_username": "$USERNAME",
-    #       "namecom_token": "$TOKEN"
-    #     }
-    #     EOF
-
-    #     terraform apply --auto-approve
-    #   working-directory: ./terraform
-
-    # Deploy microservice to provisioned infrastructure
-    - name: Move microservice deployment script to the terraform root directory
-      run: |
-        mv * ..
-      working-directory: ./terraform/microservices
-
     - name: Initialize and validate Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
@@ -136,46 +93,9 @@ jobs:
 
         terraform apply --auto-approve
       working-directory: ./terraform
-
-    # # Update domain DNS records with microservice IP address
-    # - name: Setup kubectl
-    #   uses: azure/setup-kubectl@v4
-
-    # - name: Install Kubelogin
-    #   run: sudo az aks install-cli
-
-    # - name: Get AKS Credentials
-    #   run: |
-    #     chmod +x bash_scripts/get-aks-cred.sh
-    #     ./bash_scripts/get-aks-cred.sh
-    #   working-directory: ./terraform
-    
-    # - name: Set up Kubernetes authentication with Azure CLI
-    #   run: |
-    #     kubelogin convert-kubeconfig -l azurecli
-
-    # - name: Add A record
-    #   env:
-    #     USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-    #     TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
-    #     DOMAIN: ${{ secrets.DOMAIN }}
-    #   run: |
-    #     chmod +x up_A_record.sh
-    #     ./up_A_record.sh
-    #   working-directory: ./terraform/bash_scripts
-
-    # # Test microservice URL
-    # - name: Wait for certificate to be issued
-    #   run: |
-    #     sleep 120
-
+      
+    # # Check if the microservice is deployed and accessible
     # - name: Check if microservice URL (api.your.domain/time) works
-    #   env:
-    #     DOMAIN: ${{ secrets.DOMAIN }}
     #   run: |
+    #     DOMAIN=$(terraform output -raw ingress_ip)
     #     curl -v https://api.$DOMAIN/time
-
-    - name: Check if microservice URL (api.your.domain/time) works
-      run: |
-        DOMAIN=$(terraform output -raw ingress_ip)
-        curl -v https://api.$DOMAIN/time
