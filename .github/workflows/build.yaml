@@ -2,9 +2,9 @@ name: Provision Infrastructure and Deploy API
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -80,14 +80,10 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
-        USERNAME: ${{ secrets.DOMAIN_API_USERNAME }}
-        TOKEN: ${{ secrets.DOMAIN_API_TOKEN }}
       run: |
         cat <<EOF > terraform.tfvars.json
         {
-          "my_user_object_id": "$USER_OBJECT_ID",
-          "namecom_username": "$USERNAME",
-          "namecom_token": "$TOKEN"
+          "my_user_object_id": "$USER_OBJECT_ID"
         }
         EOF
 

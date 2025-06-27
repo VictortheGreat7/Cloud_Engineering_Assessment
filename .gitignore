@@ -2,6 +2,5 @@
 *alerts.tf*
 *dashboard.tf*
 prev_attempts/
-microservices/
 /*.sh
 *.md

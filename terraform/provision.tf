@@ -37,22 +37,3 @@ module "nginx-controller" {
 
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
-
-resource "helm_release" "cert_manager" {
-  name       = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  version    = "v1.5.4"
-
-  create_namespace = true
-  namespace        = "cert-manager"
-
-  set {
-    name  = "installCRDs"
-    value = "true"
-  }
-
-  timeout = 600
-
-  depends_on = [module.nginx-controller]
-}

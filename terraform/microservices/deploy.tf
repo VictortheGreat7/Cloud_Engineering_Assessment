@@ -47,7 +47,7 @@ resource "kubernetes_deployment_v1" "time_api" {
     }
   }
 
-  depends_on = [module.nginx-controller, kubernetes_namespace_v1.time_api] # helm_release.cert_manager_issuers
+  depends_on = [module.nginx-controller, kubernetes_namespace_v1.time_api]
 }
 
 # This creates a service for the time API deployment, allowing it to be accessed within the cluster.
@@ -110,47 +110,15 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
   depends_on = [kubernetes_service_v1.time_api]
 }
 
-resource "time_sleep" "wait_for_nginx" {
-  create_duration = "120s"  # Wait 2 minutes
-
-  depends_on = [module.nginx-controller]
-}
-
 # This makes the API service accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
   metadata {
     name      = "time-api-ingress"
     namespace = "time-api"
-    # annotations = {
-    #   "cert-manager.io/cluster-issuer" = "certmanager"
-    # }
   }
 
   spec {
     ingress_class_name = "nginx"
-
-    # tls {
-    #   hosts       = ["api.mywonder.works"]
-    #   secret_name = "time-api-tls"
-    # }
-
-    # rule {
-    #   host = "api.mywonder.works"
-    #   http {
-    #     path {
-    #       path      = "/time"
-    #       path_type = "Prefix"
-    #       backend {
-    #         service {
-    #           name = kubernetes_service_v1.time_api.metadata[0].name
-    #           port {
-    #             number = kubernetes_service_v1.time_api.spec[0].port[0].port
-    #           }
-    #         }
-    #       }
-    #     }
-    #   }
-    # }
 
     # Added a Default rule (no host) because my domain expired and I need to use the public IP for now
     rule {
@@ -171,5 +139,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api, time_sleep.wait_for_nginx]
+  depends_on = [kubernetes_service_v1.time_api]
 }
