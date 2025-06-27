@@ -139,5 +139,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api]
+  depends_on = [kubernetes_service_v1.time_api, azurerm_dashboard_grafana.timeapi_grafana]
 }

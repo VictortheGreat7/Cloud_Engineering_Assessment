@@ -103,4 +103,6 @@ resource "azurerm_dashboard_grafana" "timeapi_grafana" {
   azure_monitor_workspace_integrations {
     resource_id = azurerm_monitor_workspace.monitor_workspace.id
   }
+
+  depends_on = [module.nginx-controller]
 }
