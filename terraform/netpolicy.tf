@@ -81,7 +81,7 @@ resource "kubernetes_network_policy_v1" "allow_ingress_to_time_api" {
       from {
         namespace_selector {
           match_labels = {
-            "kubernetes.io/metadata.name" = "nginx-ingress"
+            "kubernetes.io/metadata.name" = "kube-system"
           }
         }
         pod_selector {
