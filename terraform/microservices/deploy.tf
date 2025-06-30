@@ -113,7 +113,7 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
 resource "time_sleep" "wait_for_nginx" {
   create_duration = "120s"  # Wait 2 minutes
 
-  depends_on = [module.nginx-controller]
+  depends_on = [module.nginx-controller, kubernetes_job_v1.time_api_loadtest]
 }
 
 # This makes the API service accessible from outside the cluster.

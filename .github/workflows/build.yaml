@@ -126,4 +126,5 @@ jobs:
     # - name: Check if microservice URL (api.your.domain/time) works
     #   run: |
     #     DOMAIN=$(terraform output -raw ingress_ip)
-    #     curl -v https://api.$DOMAIN/time
+    #     terraform output -raw ingress_ip | xargs -I {} curl -v https://api.{}/time
+
