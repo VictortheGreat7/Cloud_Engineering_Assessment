@@ -122,9 +122,8 @@ jobs:
         terraform apply --auto-approve
       working-directory: ./terraform
       
-    # # Check if the microservice is deployed and accessible
-    # - name: Check if microservice URL (api.your.domain/time) works
-    #   run: |
-    #     DOMAIN=$(terraform output -raw ingress_ip)
-    #     terraform output -raw ingress_ip | xargs -I {} curl -v https://api.{}/time
+    # Check if the microservice is deployed and accessible
+    - name: Check if microservice URL (api.your.domain/time) works
+      run: |
+        terraform output -raw ingress_ip | xargs -I {} curl -v https://api.{}/time
 
