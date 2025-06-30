@@ -85,24 +85,24 @@ resource "azurerm_monitor_diagnostic_setting" "timeapi_audit_logs" {
   }
 }
 
-resource "azurerm_dashboard_grafana" "timeapi_grafana" {
-  name                = "timeapi-grafana"
-  location            = azurerm_resource_group.time_api_rg.location
-  resource_group_name = azurerm_resource_group.time_api_rg.name
+# resource "azurerm_dashboard_grafana" "timeapi_grafana" {
+#   name                = "timeapi-grafana"
+#   location            = azurerm_resource_group.time_api_rg.location
+#   resource_group_name = azurerm_resource_group.time_api_rg.name
 
-  grafana_major_version             = 11
-  api_key_enabled                   = true
-  deterministic_outbound_ip_enabled = true
-  public_network_access_enabled     = true # Set to false for private access only
+#   grafana_major_version             = 11
+#   api_key_enabled                   = true
+#   deterministic_outbound_ip_enabled = true
+#   public_network_access_enabled     = true # Set to false for private access only
 
-  identity {
-    type = "SystemAssigned"
-  }
-  sku = "Standard"
+#   identity {
+#     type = "SystemAssigned"
+#   }
+#   sku = "Standard"
 
-  azure_monitor_workspace_integrations {
-    resource_id = azurerm_monitor_workspace.monitor_workspace.id
-  }
+#   azure_monitor_workspace_integrations {
+#     resource_id = azurerm_monitor_workspace.monitor_workspace.id
+#   }
 
-  depends_on = [module.nginx-controller]
-}
+#   depends_on = [module.nginx-controller]
+# }
