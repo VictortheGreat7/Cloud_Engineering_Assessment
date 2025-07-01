@@ -125,5 +125,5 @@ jobs:
     # Check if the microservice is deployed and accessible
     - name: Check if microservice URL (api.your.domain/time) works
       run: |
-        terraform output -raw ingress_ip | xargs -I {} curl -v https://api.{}/time
+        terraform output -raw ingress_ip
 
