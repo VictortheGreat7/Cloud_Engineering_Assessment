@@ -110,11 +110,11 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
   depends_on = [kubernetes_service_v1.time_api]
 }
 
-resource "time_sleep" "wait_for_nginx" {
-  create_duration = "120s"  # Wait 2 minutes
+# resource "time_sleep" "wait_for_nginx" {
+#   create_duration = "120s"  # Wait 2 minutes
 
-  depends_on = [module.nginx-controller, kubernetes_job_v1.time_api_loadtest]
-}
+#   depends_on = [module.nginx-controller, kubernetes_job_v1.time_api_loadtest]
+# }
 
 # This makes the API service accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
@@ -145,5 +145,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api, azurerm_dashboard_grafana.timeapi_grafana, time_sleep.wait_for_nginx]
+  depends_on = [kubernetes_service_v1.time_api, azurerm_dashboard_grafana.timeapi_grafana] #, time_sleep.wait_for_nginx
 }
