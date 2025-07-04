@@ -70,8 +70,9 @@ cat <<EOF > secrets.yaml
 azure:
   client_id: "$APP_ID"
   client_secret: "$PASSWORD"
-  tenant_id: "$TENANT"
   subscription_id: "$(az account show --query id -o tsv)"
+  tenant_id: "$TENANT"
+  user_object_id: "$USER_OBJECT_ID"
 EOF
 echo "Service principal details saved to secrets.yaml"
 

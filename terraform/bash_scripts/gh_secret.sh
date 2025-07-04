@@ -29,11 +29,6 @@ declare -A secrets=(
   ["ARM_SUBSCRIPTION_ID"]="${SUBSCRIPTION_ID}"
   ["ARM_TENANT_ID"]="${TENANT_ID}"
   ["MY_USER_OBJECT_ID"]=""
-  ["DOMAIN"]=""
-  ["DOMAIN_API_USERNAME"]=""
-  ["DOMAIN_API_TOKEN"]=""
-  ["DOCKER_USERNAME"]=""
-  ["DOCKER_PASSWORD"]=""
 )
 
 # Iterate over the secrets and set them using `gh secret set`

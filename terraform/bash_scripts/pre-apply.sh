@@ -2,10 +2,10 @@
 set -eu
 
 # Set variables
-RESOURCE_GROUP_NAME=backend-rg
-STORAGE_ACCOUNT_NAME=bunnybackend349
-CONTAINER_NAME=tfstate
-REGION=eastus
+RESOURCE_GROUP_NAME="backend-rg"
+STORAGE_ACCOUNT_NAME="bunnybackend349"
+CONTAINER_NAME="tfstate"
+REGION="eastus"
 
 # # Check if Azure CLI is installed and user is logged in
 # if ! command -v az &> /dev/null; then
