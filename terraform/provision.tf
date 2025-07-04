@@ -32,8 +32,5 @@ module "nginx-controller" {
   source  = "terraform-iaac/nginx-controller/helm"
   version = ">=2.3.0"
 
-  create_namespace = true
-  namespace        = "nginx-ingress"
-
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
