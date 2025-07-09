@@ -1,3 +1,5 @@
+# This file contains defines some output requests to the Time API Azure Kubernetes Infrastructure.
+
 output "aks_resource_group" {
   value = azurerm_resource_group.time_api_rg.name
 }
@@ -15,7 +17,6 @@ output "kube_config" {
   sensitive = true
 }
 
-# Output the ingress IP for reference
 output "ingress_ip" {
   value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
 }

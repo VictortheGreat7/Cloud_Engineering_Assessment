@@ -1,4 +1,4 @@
-# This file is used to define the providers for the terraform configuration.
+# This file contains the provider configurations for the Microsoft Azure Cloud Infrastructure for the Time API application.
 
 terraform {
   required_providers {

@@ -1,4 +1,4 @@
-# This file contains the variables that will be used in the main.tf file
+# This file contains the variable definitions for the Terraform configuration of the Time API Azure Kubernetes Service (AKS) cluster.
 
 variable "region" {
   description = "The location/region of the resource group"

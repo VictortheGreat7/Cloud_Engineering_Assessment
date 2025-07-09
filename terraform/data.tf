@@ -17,7 +17,6 @@ data "azurerm_kubernetes_cluster" "time_api_cluster" {
   ]
 }
 
-# Add a data source to get the ingress IP after it's created
 data "kubernetes_service" "nginx_ingress" {
   metadata {
     name      = "ingress-nginx-controller"

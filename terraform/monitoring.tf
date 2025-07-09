@@ -1,3 +1,5 @@
+# This file contains the monitoring and logging configuration for the Time API application deployed on Azure Kubernetes Service (AKS).
+
 resource "azurerm_log_analytics_workspace" "timeapi_law" {
   name                = "${azurerm_resource_group.time_api_rg.name}-law"
   location            = azurerm_resource_group.time_api_rg.location
@@ -10,7 +12,6 @@ resource "azurerm_monitor_workspace" "monitor_workspace" {
   resource_group_name = azurerm_resource_group.time_api_rg.name
 }
 
-# Data Collection Endpoint
 resource "azurerm_monitor_data_collection_endpoint" "time_api_dce" {
   name                = "time-api-dce"
   resource_group_name = azurerm_resource_group.time_api_rg.name
@@ -18,7 +19,6 @@ resource "azurerm_monitor_data_collection_endpoint" "time_api_dce" {
   kind                = "Linux"
 }
 
-# Data Collection Rule for Prometheus
 resource "azurerm_monitor_data_collection_rule" "time_api_dcr" {
   name                        = "time-api-prometheus-dcr"
   resource_group_name         = azurerm_resource_group.time_api_rg.name
@@ -47,7 +47,6 @@ resource "azurerm_monitor_data_collection_rule" "time_api_dcr" {
   description = "Data collection rule for Prometheus metrics"
 }
 
-# Data Collection Rule Association with AKS cluster
 resource "azurerm_monitor_data_collection_rule_association" "time_api_dcra" {
   name                    = "time-api-dcra"
   target_resource_id      = azurerm_kubernetes_cluster.time_api_cluster.id
@@ -93,7 +92,7 @@ resource "azurerm_dashboard_grafana" "timeapi_grafana" {
   grafana_major_version             = 11
   api_key_enabled                   = true
   deterministic_outbound_ip_enabled = true
-  public_network_access_enabled     = true # Set to false for private access only
+  public_network_access_enabled     = true
 
   identity {
     type = "SystemAssigned"

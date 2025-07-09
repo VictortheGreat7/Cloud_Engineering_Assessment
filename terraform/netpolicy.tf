@@ -1,4 +1,5 @@
-# Default Deny Policy for the application namespace
+# This file contains the Kubernetes Network Policies for the time-api namespace.
+
 resource "kubernetes_network_policy_v1" "default_deny" {
   metadata {
     name      = "default-deny-all"

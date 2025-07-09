@@ -126,7 +126,6 @@ resource "kubernetes_ingress_v1" "time_api" {
   spec {
     ingress_class_name = "nginx"
 
-    # Added a Default rule (no host) because my domain expired and I need to use the public IP for now
     rule {
       http {
         path {

@@ -1,6 +1,5 @@
 # This file contains the network resources for the Time API Azure Kubernetes cluster.
 
-# Virtual Network 
 resource "azurerm_virtual_network" "time_api_vnet" {
   name                = "vnet-${azurerm_resource_group.time_api_rg.name}"
   address_space       = ["10.240.0.0/16"]
@@ -8,7 +7,6 @@ resource "azurerm_virtual_network" "time_api_vnet" {
   resource_group_name = azurerm_resource_group.time_api_rg.name
 }
 
-# AKS Cluster Subnet
 resource "azurerm_subnet" "time_api_subnet" {
   name                 = "subnet-${azurerm_resource_group.time_api_rg.name}"
   resource_group_name  = azurerm_resource_group.time_api_rg.name
@@ -16,7 +14,6 @@ resource "azurerm_subnet" "time_api_subnet" {
   address_prefixes     = ["10.240.0.0/22"]
 }
 
-# AKS Cluster Subnet Network Security Group
 resource "azurerm_network_security_group" "time_api_nsg" {
   name                = "nsg-${azurerm_resource_group.time_api_rg.name}"
   resource_group_name = azurerm_resource_group.time_api_rg.name
@@ -34,7 +31,6 @@ resource "azurerm_network_security_group" "time_api_nsg" {
     destination_address_prefix = "*"
   }
 
-  # My domain expired so I 'm using the public IP for now
   security_rule {
     name                       = "allow-http-access"
     priority                   = 103
@@ -77,7 +73,6 @@ resource "azurerm_subnet_network_security_group_association" "time_api_nsg_subne
   network_security_group_id = azurerm_network_security_group.time_api_nsg.id
 }
 
-# NAT Gateway
 resource "azurerm_nat_gateway" "time_api_nat_gateway" {
   name                    = "natgw-${azurerm_resource_group.time_api_rg.name}"
   location                = azurerm_resource_group.time_api_rg.location
@@ -90,7 +85,6 @@ resource "azurerm_nat_gateway" "time_api_nat_gateway" {
   }
 }
 
-# NAT Gateway Public IP
 resource "azurerm_public_ip" "time_api_public_ip" {
   name                = "public-ip-${azurerm_resource_group.time_api_rg.name}"
   location            = azurerm_resource_group.time_api_rg.location

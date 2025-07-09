@@ -1,4 +1,4 @@
-# This file contains the terraform code to create the AKS cluster.
+# This file contains the main Terraform configuration for creating an Azure Kubernetes Service (AKS) cluster for the Time API application.
 
 resource "random_pet" "time_api" {
 }

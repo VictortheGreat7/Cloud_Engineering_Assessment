@@ -7,11 +7,11 @@ STORAGE_ACCOUNT_NAME="bunnybackend349"
 CONTAINER_NAME="tfstate"
 REGION="eastus"
 
-# # Check if Azure CLI is installed and user is logged in
-# if ! command -v az &> /dev/null; then
-#     echo "Azure CLI is not installed. Please install it first."
-#     exit 1
-# fi
+# Check if Azure CLI is installed and user is logged in
+if ! command -v az &> /dev/null; then
+    echo "Azure CLI is not installed. Please install it first."
+    exit 1
+fi
 
 if ! az account show &> /dev/null; then
     echo "You are not logged into Azure. Please run 'az login' first."
