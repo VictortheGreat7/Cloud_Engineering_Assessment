@@ -42,7 +42,12 @@ runcmd:
   - tar xzf ./actions-runner-linux-x64-2.326.0.tar.gz
 
   # --- Configure the runner (Token will need to be injected securely using Terraform) ---
-  - ./config.sh --url https://github.com/VictortheGreat7/Cloud_Engineering_Assessment --token A2B45GYEIET5PBIAFM6S7HTIQUBHM
+  - ./config.sh --url https://github.com/VictortheGreat7/Cloud_Engineering_Assessment --token A2B45GYTK2NNSAWABH5WJCTIQUTLE
+
+  - curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+  - sudo apt install -y nodejs
+  - node -v
+  - npm -v
 
   # --- Create a systemd service to keep the runner running ---
   - |
