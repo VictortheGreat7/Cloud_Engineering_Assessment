@@ -34,7 +34,7 @@ resource "azurerm_linux_virtual_machine" "gha_vm" {
   source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-noble"
-    sku       = "24_04-lts"
+    sku       = "24_04-lts-gen2"
     version   = "latest"
   }
 

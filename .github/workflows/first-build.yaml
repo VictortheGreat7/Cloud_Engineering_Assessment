@@ -95,6 +95,7 @@ jobs:
           sleep 180
 
   build:
+    needs: provision-runner
     runs-on: self-hosted
 
     steps:
