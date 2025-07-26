@@ -4,7 +4,7 @@ name: Provision Infrastructure and Deploy API
 on:
   push:
     branches:
-      - main
+      - self-hosted
   workflow_dispatch:
 
 jobs:
