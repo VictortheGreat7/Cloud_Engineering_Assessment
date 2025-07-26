@@ -7,11 +7,85 @@ resource "azurerm_virtual_network" "time_api_vnet" {
   resource_group_name = azurerm_resource_group.time_api_rg.name
 }
 
+resource "azurerm_subnet" "gha_subnet" {
+  name                 = "gha-${azurerm_resource_group.time_api_rg.name}-subnet"
+  resource_group_name  = azurerm_resource_group.time_api_rg.name
+  virtual_network_name = azurerm_virtual_network.time_api_vnet.name
+  address_prefixes     = ["10.240.0.0/24"]
+}
+
+resource "azurerm_public_ip" "gha_public_ip" {
+  name                = "gha-${azurerm_resource_group.time_api_rg.name}-publicip"
+  location            = azurerm_resource_group.time_api_rg.location
+  resource_group_name = azurerm_resource_group.time_api_rg.name
+  allocation_method   = "Dynamic"
+}
+
+resource "azurerm_network_interface" "gha_nic" {
+  name                = "gha-${azurerm_resource_group.time_api_rg.name}-nic"
+  location            = azurerm_resource_group.time_api_rg.location
+  resource_group_name = azurerm_resource_group.time_api_rg.name
+
+  ip_configuration {
+    name                          = "ipconfig1"
+    subnet_id                     = azurerm_subnet.gha_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.gha_public_ip.id
+  }
+}
+
+resource "azurerm_network_security_group" "gha_nsg" {
+  name                = "gha-${azurerm_resource_group.time_api_rg.name}-nsg"
+  location            = azurerm_resource_group.time_api_rg.location
+  resource_group_name = azurerm_resource_group.time_api_rg.name
+
+  security_rule {
+    name                       = "SSH"
+    priority                   = 101
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "allow-vnet-inbound"
+    priority                   = 102
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "deny-all-inbound"
+    priority                   = 4096
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
+  network_interface_id      = azurerm_network_interface.gha_nic.id
+  network_security_group_id = azurerm_network_security_group.gha_nsg.id
+}
+
 resource "azurerm_subnet" "time_api_subnet" {
   name                 = "subnet-${azurerm_resource_group.time_api_rg.name}"
   resource_group_name  = azurerm_resource_group.time_api_rg.name
   virtual_network_name = azurerm_virtual_network.time_api_vnet.name
-  address_prefixes     = ["10.240.0.0/22"]
+  address_prefixes     = ["10.240.1.0/22"]
 }
 
 resource "azurerm_network_security_group" "time_api_nsg" {

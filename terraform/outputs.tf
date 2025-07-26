@@ -8,15 +8,7 @@ output "natgtw_ip" {
   value = azurerm_public_ip.time_api_public_ip
 }
 
-output "aks_cluster_name" {
-  value = azurerm_kubernetes_cluster.time_api_cluster.name
-}
-
-output "kube_config" {
-  value     = azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config
-  sensitive = true
-}
-
-output "ingress_ip" {
-  value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
+output "ssh_command" {
+  description = "SSH command to connect to the VM"
+  value       = "ssh -i ssh_keys/id_rsa azureuser@${azurerm_public_ip.gha_public_ip.ip_address}"
 }

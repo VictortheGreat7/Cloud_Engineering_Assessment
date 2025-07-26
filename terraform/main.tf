@@ -8,72 +8,35 @@ resource "azurerm_resource_group" "time_api_rg" {
   location = var.region
 }
 
-resource "azurerm_kubernetes_cluster" "time_api_cluster" {
-  name                = "aks-${azurerm_resource_group.time_api_rg.name}-cluster"
+resource "azurerm_linux_virtual_machine" "gha_vm" {
+  name                = "gha-${azurerm_resource_group.time_api_rg.name}-vm"
   resource_group_name = azurerm_resource_group.time_api_rg.name
   location            = azurerm_resource_group.time_api_rg.location
-  dns_prefix          = "dns-${azurerm_resource_group.time_api_rg.name}-cluster"
-  kubernetes_version  = data.azurerm_kubernetes_service_versions.current.default_version
-  node_resource_group = "nrg-aks-${azurerm_resource_group.time_api_rg.name}-cluster"
+  size                = "Standard_D2_v2"
+  admin_username      = "azureuser"
+  network_interface_ids = [
+    azurerm_network_interface.gha_nic.id,
+  ]
 
-  default_node_pool {
-    name                 = "default"
-    vm_size              = "Standard_D2_v2"
-    auto_scaling_enabled = true
-    max_count            = 2
-    min_count            = 1
-    os_disk_size_gb      = 30
-    type                 = "VirtualMachineScaleSets"
-    vnet_subnet_id       = azurerm_subnet.time_api_subnet.id
-    node_labels = {
-      "nodepool-type" = "system"
-      "environment"   = "test"
-      "nodepoolos"    = "linux"
-    }
-    tags = {
-      "nodepool-type" = "system"
-      "environment"   = "test"
-      "nodepoolos"    = "linux"
-    }
+   admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("${path.module}/ssh_keys/id_rsa.pub")
   }
 
-  identity {
-    type = "SystemAssigned"
+  admin_password = "Terraform123!" # Only for demo; use SSH in production
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    name                 = "gha-os-disk"
   }
 
-  azure_active_directory_role_based_access_control {
-    azure_rbac_enabled     = true
-    admin_group_object_ids = [azuread_group.time_api_admins.object_id]
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-noble"
+    sku       = "24_04-lts"
+    version   = "latest"
   }
 
-  network_profile {
-    network_plugin    = "azure"
-    network_policy    = "azure"
-    load_balancer_sku = "standard"
-    dns_service_ip    = "172.16.0.10"
-    service_cidr      = "172.16.0.0/16"
-    outbound_type     = "userAssignedNATGateway"
-    nat_gateway_profile {
-      idle_timeout_in_minutes = 4
-    }
-  }
-
-  oms_agent {
-    log_analytics_workspace_id      = azurerm_log_analytics_workspace.timeapi_law.id
-    msi_auth_for_monitoring_enabled = true
-  }
-
-  monitor_metrics {
-    annotations_allowed = null
-    labels_allowed      = null
-  }
-
-  cost_analysis_enabled = true
-  sku_tier              = "Standard"
-
-  depends_on = [azuread_group.time_api_admins, azurerm_subnet_nat_gateway_association.time_api_natgw_subnet_association, azurerm_nat_gateway_public_ip_association.time_api_natgw_public_ip_association]
-
-  tags = {
-    Environment = "test"
-  }
+  custom_data = base64encode(file("${path.module}/cloud-init.yaml"))
 }

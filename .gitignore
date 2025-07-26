@@ -4,4 +4,5 @@
 prev_attempts/
 **microservices/
 /*.sh
+id_rsa
 GeminiREADME.md
