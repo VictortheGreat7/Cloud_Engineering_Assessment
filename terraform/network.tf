@@ -19,6 +19,7 @@ resource "azurerm_public_ip" "gha_public_ip" {
   location            = azurerm_resource_group.time_api_rg.location
   resource_group_name = azurerm_resource_group.time_api_rg.name
   allocation_method   = "Dynamic"
+  sku                = "Basic"
 }
 
 resource "azurerm_network_interface" "gha_nic" {
@@ -85,7 +86,7 @@ resource "azurerm_subnet" "time_api_subnet" {
   name                 = "subnet-${azurerm_resource_group.time_api_rg.name}"
   resource_group_name  = azurerm_resource_group.time_api_rg.name
   virtual_network_name = azurerm_virtual_network.time_api_vnet.name
-  address_prefixes     = ["10.240.1.0/22"]
+  address_prefixes     = ["10.240.4.0/22"]
 }
 
 resource "azurerm_network_security_group" "time_api_nsg" {
