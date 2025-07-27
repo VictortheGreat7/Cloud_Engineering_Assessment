@@ -94,8 +94,7 @@ jobs:
 
   #   - name: Move /deploy contents to /terraform
   #     run: |
-  #       mv main.tf prevent_destroy/
-  #       mv allow_destroy/main.tf .
+  #       mv deploy/* .
   #     working-directory: ./terraform
 
   #   - name: Login to Microsoft Azure CLI
