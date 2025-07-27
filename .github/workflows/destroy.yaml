@@ -90,7 +90,7 @@ jobs:
         kubelogin convert-kubeconfig -l spn --client-id "${ARM_CLIENT_ID}" --client-secret "${ARM_CLIENT_SECRET}" --tenant-id "${ARM_TENANT_ID}"
 
         echo "Verifying kubectl access"
-        kubectl get all -A
+        kubectl get ns -A
         
         terraform apply --auto-approve
       working-directory: ./terraform
