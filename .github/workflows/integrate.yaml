@@ -1,6 +1,4 @@
 name: Subsequent Builds and Deployments
-
-# This workflow will run on pushes to the main branch and manual triggers
 on:
   workflow_dispatch:
 
