@@ -125,19 +125,26 @@ resource "null_resource" "wait_for_ingress_webhook" {
       echo "Converting kubeconfig with kubelogin..."
       kubelogin convert-kubeconfig -l azurecli
 
-      echo "Waiting for ingress-nginx-controller deployment to be ready..."
+      echo "Waiting for ingress-nginx-controller DaemonSet pods to be ready..."
       for i in {1..30}; do
-        echo "Attempt $i: checking deployment readiness..."
-        if kubectl wait --for=condition=Available --timeout=300s daemonset ingress-nginx-controller -n kube-system; then
-          echo "Deployment is ready."
+        READY=$(kubectl get daemonset ingress-nginx-controller -n kube-system -o jsonpath='{.status.numberReady}')
+        DESIRED=$(kubectl get daemonset ingress-nginx-controller -n kube-system -o jsonpath='{.status.desiredNumberScheduled}')
+        
+        echo "Attempt $i: $READY/$DESIRED pods ready"
+
+        if [[ "$READY" == "$DESIRED" ]] && [[ "$READY" -gt 0 ]]; then
+          echo "All DaemonSet pods are ready"
           break
         fi
-        if [[ $i -eq 30 ]]; then
-          echo "Deployment did not become ready in time."
+
+        if [[ "$i" -eq 30 ]]; then
+          echo "Timed out waiting for DaemonSet pods to be ready"
           exit 1
         fi
+
         sleep 10
       done
+
 
       echo "Waiting for admission webhook to be ready..."
       for i in {1..30}; do
