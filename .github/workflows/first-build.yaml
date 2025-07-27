@@ -94,7 +94,7 @@ jobs:
       - name: Wait for VM to be ready
         run: |
           echo "Waiting for runner VM to be ready..."
-          sleep 300
+          sleep 240
 
   build:
     needs: provision-runner

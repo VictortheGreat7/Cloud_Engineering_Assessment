@@ -57,6 +57,12 @@ jobs:
     - name: Checkout this Github repository
       uses: actions/checkout@v4
 
+    - name: Move /deploy contents to /terraform
+      run: |
+        mv main.tf prevent_destroy/
+        mv allow_destroy/main.tf .
+      working-directory: ./terraform
+
     - name: Login to Microsoft Azure CLI
       uses: azure/login@v2
       with:
