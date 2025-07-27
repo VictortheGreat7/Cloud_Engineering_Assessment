@@ -45,6 +45,7 @@ jobs:
         sudo az aks install-cli
 
         kubelogin convert-kubeconfig -l azurecli
+      working-directory: ./terraform
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
