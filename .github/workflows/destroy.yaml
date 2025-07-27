@@ -82,7 +82,8 @@ jobs:
 
         sudo az aks install-cli
 
-        kubelogin convert-kubeconfig -l azurecli
+        kubelogin convert-kubeconfig -l spn --client-id "$ARM_CLIENT_ID" --client-secret "$ARM_CLIENT_SECRET" --tenant-id "$ARM_TENANT_ID"
+
         
         terraform apply --auto-approve
       working-directory: ./terraform
