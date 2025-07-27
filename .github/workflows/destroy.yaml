@@ -82,13 +82,15 @@ jobs:
         chmod +x bash_scripts/get-aks-cred.sh
         ./bash_scripts/get-aks-cred.sh
 
-        export KUBECONFIG="$HOME/.kube/config"
+        export KUBECONFIG="/home/githubrunner/.kube/config
         echo "KUBECONFIG set to $KUBECONFIG"
 
         sudo az aks install-cli
 
         kubelogin convert-kubeconfig -l spn --client-id "${ARM_CLIENT_ID}" --client-secret "${ARM_CLIENT_SECRET}" --tenant-id "${ARM_TENANT_ID}"
 
+        echo "Verifying kubectl access"
+        kubectl get nodes
         
         terraform apply --auto-approve
       working-directory: ./terraform
