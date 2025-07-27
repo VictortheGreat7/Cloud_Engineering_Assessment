@@ -83,6 +83,7 @@ jobs:
         ./bash_scripts/get-aks-cred.sh
 
         export KUBECONFIG="$HOME/.kube/config"
+        echo "KUBECONFIG set to $KUBECONFIG"
 
         sudo az aks install-cli
 
