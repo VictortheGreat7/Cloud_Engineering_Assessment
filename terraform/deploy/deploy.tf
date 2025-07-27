@@ -128,7 +128,7 @@ resource "null_resource" "wait_for_ingress_webhook" {
       echo "Waiting for ingress-nginx-controller deployment to be ready..."
       for i in {1..30}; do
         echo "Attempt $i: checking deployment readiness..."
-        if kubectl wait --for=condition=Available --timeout=300s deployment ingress-nginx-controller -n kube-system; then
+        if kubectl wait --for=condition=Available --timeout=300s daemonset ingress-nginx-controller -n kube-system; then
           echo "Deployment is ready."
           break
         fi
