@@ -97,7 +97,7 @@ jobs:
         echo "Verifying kubectl access"
         kubectl get ns -A
         
-        terraform destroy --auto-approve
+        terraform destroy -target=azurerm_kubernetes_cluster.time_api_cluster --auto-approve
       working-directory: ./terraform
     
   destroy-runner-vm:
