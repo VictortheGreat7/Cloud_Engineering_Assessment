@@ -21,6 +21,11 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Move /deploy contents to /terraform
+      run: |
+        mv deploy/* .
+      working-directory: ./terraform
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
@@ -92,7 +97,7 @@ jobs:
         echo "Verifying kubectl access"
         kubectl get ns -A
         
-        terraform apply --auto-approve
+        terraform destroy --auto-approve
       working-directory: ./terraform
     
   destroy-runner-vm:

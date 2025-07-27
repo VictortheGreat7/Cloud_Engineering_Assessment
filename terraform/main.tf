@@ -44,8 +44,6 @@ resource "azurerm_linux_virtual_machine" "gha_vm" {
 
   lifecycle {
     prevent_destroy = true
-    ignore_changes  = [
-      custom_data
-    ]
+    ignore_changes  = all
   }
 }
