@@ -44,7 +44,7 @@ runcmd:
 
   # --- Configure the runner (Token will need to be injected securely using Terraform) ---
   - |
-    sudo expect -c '
+    expect -c '
     spawn ./config.sh --url https://github.com/VictortheGreat7/Cloud_Engineering_Assessment --token ${github_runner_token}
     expect {
         "Enter the name of the runner group to add this runner to:" { send "\r"; exp_continue }
