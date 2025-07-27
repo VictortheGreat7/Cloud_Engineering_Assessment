@@ -78,18 +78,12 @@ provider "kubernetes" {
 
 provider "helm" {
   kubernetes {
-    host                   = azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].cluster_ca_certificate)
+    config_path = pathexpand("/home/githubrunner/.kube/config")
   }
 }
 
 provider "kubectl" {
-  host                   = azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.time_api_cluster.kube_admin_config[0].cluster_ca_certificate)
+  config_path = pathexpand("/home/githubrunner/.kube/config")
 }
 
 resource "kubernetes_namespace_v1" "time_api" {
