@@ -11,6 +11,7 @@ packages:
   - gnupg
   - lsb-release
   - software-properties-common
+  - expect
 
 runcmd:
   # --- Install Docker ---
@@ -34,41 +35,41 @@ runcmd:
   # --- Install Azure CLI ---
   - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-  # --- Set up GitHub Actions Runner ---
-  - mkdir -p /opt/actions-runner
-  - cd /opt/actions-runner
-  - curl -o actions-runner-linux-x64-2.326.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.326.0/actions-runner-linux-x64-2.326.0.tar.gz
-  - echo "9c74af9b4352bbc99aecc7353b47bcdfcd1b2a0f6d15af54a99f54a0c14a1de8  actions-runner-linux-x64-2.326.0.tar.gz" | shasum -a 256 -c
-  - tar xzf ./actions-runner-linux-x64-2.326.0.tar.gz
+  # # --- Set up GitHub Actions Runner ---
+  # - mkdir -p /opt/actions-runner
+  # - cd /opt/actions-runner
+  # - curl -o actions-runner-linux-x64-2.326.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.326.0/actions-runner-linux-x64-2.326.0.tar.gz
+  # - echo "9c74af9b4352bbc99aecc7353b47bcdfcd1b2a0f6d15af54a99f54a0c14a1de8  actions-runner-linux-x64-2.326.0.tar.gz" | shasum -a 256 -c
+  # - tar xzf ./actions-runner-linux-x64-2.326.0.tar.gz
 
-  # --- Configure the runner (Token will need to be injected securely using Terraform) ---
-  - ./config.sh --url https://github.com/VictortheGreat7/Cloud_Engineering_Assessment --token A2B45GYTK2NNSAWABH5WJCTIQUTLE
+  # # --- Configure the runner (Token will need to be injected securely using Terraform) ---
+  # - ./config.sh --url https://github.com/VictortheGreat7/Cloud_Engineering_Assessment --token A2B45G3OLEF56LK245RZOWDIQXLVO
 
   - curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
   - sudo apt install -y nodejs
   - node -v
   - npm -v
 
-  # --- Create a systemd service to keep the runner running ---
-  - |
-    cat << 'EOF' > /etc/systemd/system/github-runner.service
-    [Unit]
-    Description=GitHub Actions Runner
-    After=network.target
+#   # --- Create a systemd service to keep the runner running ---
+#   - |
+#     cat << 'EOF' > /etc/systemd/system/github-runner.service
+#     [Unit]
+#     Description=GitHub Actions Runner
+#     After=network.target
 
-    [Service]
-    ExecStart=/opt/actions-runner/run.sh
-    WorkingDirectory=/opt/actions-runner
-    Restart=always
-    User=root
+#     [Service]
+#     ExecStart=/opt/actions-runner/run.sh
+#     WorkingDirectory=/opt/actions-runner
+#     Restart=always
+#     User=root
 
-    [Install]
-    WantedBy=multi-user.target
-    EOF
+#     [Install]
+#     WantedBy=multi-user.target
+#     EOF
 
-  - systemctl daemon-reexec
-  - systemctl daemon-reload
-  - systemctl enable github-runner
-  - systemctl start github-runner
+#   - systemctl daemon-reexec
+#   - systemctl daemon-reload
+#   - systemctl enable github-runner
+#   - systemctl start github-runner
 
-final_message: "🎉 GitHub Runner VM setup complete!"
+# final_message: "🎉 GitHub Runner VM setup complete!"

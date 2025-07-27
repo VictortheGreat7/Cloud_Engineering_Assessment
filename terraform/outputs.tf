@@ -8,7 +8,10 @@ output "natgtw_ip" {
   value = azurerm_public_ip.time_api_public_ip
 }
 
+output "runner_vm_ip" {
+  value = azurerm_public_ip.gha_public_ip.ip_address
+}
+
 output "ssh_command" {
-  description = "SSH command to connect to the VM"
-  value       = "ssh -i ssh_keys/id_rsa azureuser@${azurerm_public_ip.gha_public_ip.ip_address}"
+  value = "ssh -i ssh_keys/id_rsa azureuser@${data.azurerm_public_ip.gha_dynamic_ip.ip_address}"
 }

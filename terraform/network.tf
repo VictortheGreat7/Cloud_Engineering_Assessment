@@ -82,6 +82,13 @@ resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
   network_security_group_id = azurerm_network_security_group.gha_nsg.id
 }
 
+data "azurerm_public_ip" "gha_dynamic_ip" {
+  name                = azurerm_public_ip.gha_public_ip.name
+  resource_group_name = azurerm_resource_group.time_api_rg.name
+
+  depends_on = [azurerm_linux_virtual_machine.gha_vm]
+}
+
 resource "azurerm_subnet" "time_api_subnet" {
   name                 = "subnet-${azurerm_resource_group.time_api_rg.name}"
   resource_group_name  = azurerm_resource_group.time_api_rg.name
