@@ -110,11 +110,36 @@ resource "kubernetes_job_v1" "time_api_loadtest" {
   depends_on = [kubernetes_service_v1.time_api]
 }
 
-resource "time_sleep" "wait_for_nginx" {
-  create_duration = "120s" # Wait 2 minutes
+resource "null_resource" "wait_for_ingress_webhook" {
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      set -e
+
+      echo "Getting AKS credentials..."
+      az aks get-credentials --resource-group "${azurerm_kubernetes_cluster.time_api_cluster.resource_group_name}" --name "${azurerm_kubernetes_cluster.time_api_cluster.name}" --overwrite-existing
+
+      echo "Converting kubeconfig with kubelogin..."
+      kubelogin convert-kubeconfig -l azurecli
+
+      for i in {1..30}; do
+        endpoints=$(kubectl get endpoints ingress-nginx-controller-admission -n kube-system -o jsonpath='{.subsets[*].addresses[*].ip}')
+        if [[ ! -z "$endpoints" ]]; then
+          echo "Ingress controller admission webhook is ready."
+          exit 0
+        fi
+        echo "Waiting for ingress-nginx admission webhook... ($i/30)"
+        sleep 10
+      done
+
+      echo "Timed out waiting for ingress-nginx admission webhook"
+      exit 1
+    EOT
+  }
 
   depends_on = [module.nginx-controller]
 }
+
 
 # This makes the API service accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
@@ -144,5 +169,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api, azurerm_dashboard_grafana.timeapi_grafana, time_sleep.wait_for_nginx]
+  depends_on = [kubernetes_service_v1.time_api, azurerm_dashboard_grafana.timeapi_grafana, null_resource.wait_for_ingress_webhook]
 }
