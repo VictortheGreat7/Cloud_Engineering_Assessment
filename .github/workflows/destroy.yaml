@@ -59,6 +59,7 @@ jobs:
       working-directory: ./terraform
     
   destroy-runner-vm:
+    needs: destroy-cluster
     runs-on: ubuntu-latest
 
     steps:
