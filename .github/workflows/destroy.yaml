@@ -41,6 +41,7 @@ jobs:
         cat <<EOF > terraform.tfvars.json
         {
           "my_user_object_id": "$USER_OBJECT_ID"
+          "github_runner_token": "$RUNNER_TOKEN"
         }
         EOF
         
@@ -84,6 +85,7 @@ jobs:
         cat <<EOF > terraform.tfvars.json
         {
           "my_user_object_id": "$USER_OBJECT_ID"
+          "github_runner_token": "$RUNNER_TOKEN"
         }
         EOF
         

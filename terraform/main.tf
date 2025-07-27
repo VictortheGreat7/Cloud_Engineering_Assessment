@@ -38,5 +38,7 @@ resource "azurerm_linux_virtual_machine" "gha_vm" {
     version   = "latest"
   }
 
-  custom_data = base64encode(file("${path.module}/cloud-init.yaml"))
+  custom_data = base64encode(templatefile("${path.module}/cloud-init.yaml.tpl", {
+    github_runner_token = var.github_runner_token
+  }))
 }

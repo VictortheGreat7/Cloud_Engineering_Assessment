@@ -10,3 +10,9 @@ variable "my_user_object_id" {
   description = "The object id of the user"
   type        = string
 }
+
+variable "github_runner_token" {
+  description = "GitHub Actions runner registration token"
+  type        = string
+  sensitive   = true
+}

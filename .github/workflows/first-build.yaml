@@ -79,10 +79,12 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
+          RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
         run: |
           cat <<EOF > terraform.tfvars.json
           {
-            "my_user_object_id": "$USER_OBJECT_ID"
+            "my_user_object_id": "$USER_OBJECT_ID",
+            "github_runner_token": "$RUNNER_TOKEN"
           }
           EOF
 
@@ -145,6 +147,7 @@ jobs:
         cat <<EOF > terraform.tfvars.json
         {
           "my_user_object_id": "$USER_OBJECT_ID"
+          "github_runner_token": "$RUNNER_TOKEN"
         }
         EOF
 
