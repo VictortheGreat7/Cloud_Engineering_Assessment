@@ -126,7 +126,18 @@ resource "null_resource" "wait_for_ingress_webhook" {
       kubelogin convert-kubeconfig -l azurecli
 
       echo "Waiting for ingress-nginx-controller deployment to be ready..."
-      kubectl wait --for=condition=Available --timeout=180s deployment ingress-nginx-controller -n kube-system
+      for i in {1..30}; do
+        echo "Attempt $i: checking deployment readiness..."
+        if kubectl wait --for=condition=Available --timeout=300s deployment ingress-nginx-controller -n kube-system; then
+          echo "Deployment is ready."
+          break
+        fi
+        if [[ $i -eq 30 ]]; then
+          echo "Deployment did not become ready in time."
+          exit 1
+        fi
+        sleep 10
+      done
 
       echo "Waiting for admission webhook to be ready..."
       for i in {1..30}; do
