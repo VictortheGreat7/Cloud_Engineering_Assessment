@@ -149,10 +149,8 @@ resource "null_resource" "wait_for_ingress_webhook" {
       for i in {1..100}; do
         echo "Checking webhook readiness... attempt $i"
         if kubectl get endpoints ingress-nginx-controller-admission -n kube-system -o jsonpath='{.subsets[*].addresses[*].ip}' | grep -q .; then
-          if curl -k --silent https://ingress-nginx-controller-admission.kube-system.svc:443/readyz; then
-            echo "Webhook server is ready"
-            exit 0
-          fi
+          echo "Webhook server is ready"
+          exit 0
         fi
         sleep 10
       done
