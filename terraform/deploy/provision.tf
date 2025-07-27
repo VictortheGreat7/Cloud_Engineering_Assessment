@@ -72,7 +72,7 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
 }
 
 provider "kubernetes" {
-  config_path = pathexpand("~/.kube/config")
+  config_path = pathexpand("/home/githubrunner/.kube/config")
 }
 
 
