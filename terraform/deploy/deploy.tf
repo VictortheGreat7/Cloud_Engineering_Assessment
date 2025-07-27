@@ -156,6 +156,7 @@ resource "null_resource" "wait_for_ingress_webhook" {
       done
 
       echo "Timed out waiting for ingress-nginx admission webhook"
+      sleep 600
       exit 1
     EOT
   }
