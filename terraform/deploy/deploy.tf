@@ -120,7 +120,7 @@ resource "null_resource" "wait_for_ingress_webhook" {
       az aks get-credentials --resource-group "${azurerm_kubernetes_cluster.time_api_cluster.resource_group_name}" --name "${azurerm_kubernetes_cluster.time_api_cluster.name}" --overwrite-existing
 
       echo "Installing kubelogin..."
-      az aks install-cli
+      sudo az aks install-cli
 
       echo "Converting kubeconfig with kubelogin..."
       kubelogin convert-kubeconfig -l azurecli
