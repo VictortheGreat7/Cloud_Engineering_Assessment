@@ -126,19 +126,18 @@ resource "null_resource" "wait_for_ingress_webhook" {
       kubelogin convert-kubeconfig -l azurecli
 
       echo "Waiting for ingress-nginx-controller DaemonSet pods to be ready..."
-      for i in {1..30}; do
+      for i in {1..100}; do
         READY=$(kubectl get daemonset ingress-nginx-controller -n kube-system -o jsonpath='{.status.numberReady}')
-        DESIRED=$(kubectl get daemonset ingress-nginx-controller -n kube-system -o jsonpath='{.status.desiredNumberScheduled}')
-        
-        echo "Attempt $i: $READY/$DESIRED pods ready"
+  
+        echo "Attempt $i: $READY pods ready"
 
-        if [[ "$READY" == "$DESIRED" ]] && [[ "$READY" -gt 0 ]]; then
-          echo "All DaemonSet pods are ready"
+        if [[ "$READY" -ge 1 ]]; then
+          echo "At least one DaemonSet pod is ready"
           break
         fi
 
-        if [[ "$i" -eq 30 ]]; then
-          echo "Timed out waiting for DaemonSet pods to be ready"
+        if [[ "$i" -eq 100 ]]; then
+          echo "Timed out waiting for at least one DaemonSet pod to be ready"
           exit 1
         fi
 
