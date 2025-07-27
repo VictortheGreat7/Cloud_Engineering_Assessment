@@ -125,13 +125,18 @@ resource "null_resource" "wait_for_ingress_webhook" {
       echo "Converting kubeconfig with kubelogin..."
       kubelogin convert-kubeconfig -l azurecli
 
+      echo "Waiting for ingress-nginx-controller deployment to be ready..."
+      kubectl wait --for=condition=Available --timeout=180s deployment ingress-nginx-controller -n kube-system
+
+      echo "Waiting for admission webhook to be ready..."
       for i in {1..30}; do
-        endpoints=$(kubectl get endpoints ingress-nginx-controller-admission -n kube-system -o jsonpath='{.subsets[*].addresses[*].ip}')
-        if [[ ! -z "$endpoints" ]]; then
-          echo "Ingress controller admission webhook is ready."
-          exit 0
+        echo "Checking webhook readiness... attempt $i"
+        if kubectl get endpoints ingress-nginx-controller-admission -n kube-system -o jsonpath='{.subsets[*].addresses[*].ip}' | grep -q .; then
+          if curl -k --silent https://ingress-nginx-controller-admission.kube-system.svc:443/readyz; then
+            echo "Webhook server is ready"
+            exit 0
+          fi
         fi
-        echo "Waiting for ingress-nginx admission webhook... ($i/30)"
         sleep 10
       done
 
