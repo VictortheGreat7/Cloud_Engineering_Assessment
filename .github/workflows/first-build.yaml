@@ -94,7 +94,7 @@ jobs:
       - name: Wait for VM to be ready
         run: |
           echo "Waiting for runner VM to be ready..."
-          sleep 240
+          sleep 270
 
   build:
     needs: provision-runner
@@ -151,6 +151,8 @@ jobs:
         }
         EOF
 
+        terraform apply --auto-approve
+
         terraform output -raw aks_resource_group
         terraform output -raw aks_cluster_name
 
@@ -160,6 +162,4 @@ jobs:
         sudo az aks install-cli
 
         kubelogin convert-kubeconfig -l azurecli
-
-        terraform apply --auto-approve
       working-directory: ./terraform
