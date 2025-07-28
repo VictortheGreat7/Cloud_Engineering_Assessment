@@ -163,6 +163,51 @@ resource "null_resource" "wait_for_ingress_webhook" {
   depends_on = [module.nginx-controller]
 }
 
+resource "kubernetes_service_account_v1" "check_ingress_sa" {
+  metadata {
+    name      = "check-ingress-sa"
+    namespace = "kube-system"
+  }
+
+  depends_on = [null_resource.wait_for_ingress_webhook]
+}
+
+resource "kubernetes_role_v1" "check_ingress_role" {
+  metadata {
+    name      = "check-ingress-role"
+    namespace = "kube-system"
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["endpoints"]
+    verbs      = ["get", "list"]
+  }
+
+  depends_on = [kubernetes_service_account_v1.check_ingress_sa]
+}
+
+resource "kubernetes_role_binding_v1" "check_ingress_binding" {
+  metadata {
+    name      = "check-ingress-binding"
+    namespace = "kube-system"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role_v1.check_ingress_role.metadata[0].name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account_v1.check_ingress_sa.metadata[0].name
+    namespace = "kube-system"
+  }
+
+  depends_on = [kubernetes_role_v1.check_ingress_role]
+}
+
 resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
   metadata {
     name      = "check-ingress-webhook"
@@ -175,12 +220,14 @@ resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
         name = "ingress-webhook-test"
       }
       spec {
+        service_account_name = kubernetes_service_account_v1.check_ingress_sa.metadata[0].name
         container {
           name    = "check"
           image   = "bitnami/kubectl:latest"
           command = ["/bin/bash", "-c"]
           args = [
             <<-EOC
+            kubectl auth can-i get endpoints -n kube-system
             for i in {1..100}; do
               echo "Checking for webhook admission endpoint..."
               IP=$(kubectl get endpoints ingress-nginx-controller-admission -n kube-system -o jsonpath='{.subsets[*].addresses[*].ip}')

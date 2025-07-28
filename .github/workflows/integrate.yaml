@@ -1,6 +1,9 @@
 name: Subsequent Builds and Deployments
 
 on:
+  push:
+    branches:
+      - self-hosted
   workflow_dispatch:
 
 jobs:
