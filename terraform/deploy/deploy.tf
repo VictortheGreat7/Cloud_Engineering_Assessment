@@ -200,7 +200,7 @@ resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
       }
     }
     backoff_limit           = 4
-    active_deadline_seconds = 300
+    active_deadline_seconds = 2000
   }
 
   depends_on = [null_resource.wait_for_ingress_webhook]
