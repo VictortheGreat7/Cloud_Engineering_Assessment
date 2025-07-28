@@ -120,6 +120,8 @@ module "nginx-controller" {
   version = ">=2.3.0"
 
   timeout = 900
+  wait    = true      # Wait for resources to fully uninstall
+  atomic  = true      # Optional: rollback on error
 
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }

@@ -253,8 +253,6 @@ resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
   depends_on = [null_resource.wait_for_ingress_webhook]
 }
 
-
-
 # This makes the API service accessible from outside the cluster.
 resource "kubernetes_ingress_v1" "time_api" {
   metadata {
