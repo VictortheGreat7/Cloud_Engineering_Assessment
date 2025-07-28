@@ -156,13 +156,54 @@ resource "null_resource" "wait_for_ingress_webhook" {
       done
 
       echo "Timed out waiting for ingress-nginx admission webhook"
-      sleep 600
       exit 1
     EOT
   }
 
   depends_on = [module.nginx-controller]
 }
+
+resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
+  metadata {
+    name      = "check-ingress-webhook"
+    namespace = "kube-system"
+  }
+
+  spec {
+    template {
+      spec {
+        container {
+          name    = "check"
+          image   = "bitnami/kubectl:latest"
+          command = ["/bin/bash", "-c"]
+          args = [
+            <<-EOC
+            for i in {1..100}; do
+              echo "Checking for webhook admission endpoint..."
+              IP=$(kubectl get endpoints ingress-nginx-controller-admission -n kube-system -o jsonpath='{.subsets[*].addresses[*].ip}')
+              if [[ ! -z "$IP" ]]; then
+                echo "Admission webhook is ready"
+                exit 0
+              fi
+              echo "Attempt $i: Admission webhook not ready yet"
+              sleep 10
+            done
+            echo "Timed out waiting for admission webhook"
+            exit 1
+            EOC
+          ]
+        }
+
+        restart_policy = "Never"
+      }
+    }
+
+    backoff_limit = 2
+  }
+
+  depends_on = [null_resource.wait_for_ingress_webhook]
+}
+
 
 
 # This makes the API service accessible from outside the cluster.
@@ -193,5 +234,5 @@ resource "kubernetes_ingress_v1" "time_api" {
     }
   }
 
-  depends_on = [kubernetes_service_v1.time_api, azurerm_dashboard_grafana.timeapi_grafana, null_resource.wait_for_ingress_webhook]
+  depends_on = [kubernetes_service_v1.time_api, azurerm_dashboard_grafana.timeapi_grafana, null_resource.wait_for_ingress_webhook, kubernetes_job_v1.wait_for_ingress_webhook]
 }
