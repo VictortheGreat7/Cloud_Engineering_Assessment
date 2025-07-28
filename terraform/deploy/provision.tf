@@ -119,6 +119,8 @@ module "nginx-controller" {
   source  = "terraform-iaac/nginx-controller/helm"
   version = ">=2.3.0"
 
+  timeout = 900
+
   depends_on = [azurerm_kubernetes_cluster.time_api_cluster]
 }
 
