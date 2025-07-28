@@ -171,6 +171,9 @@ resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
 
   spec {
     template {
+      metadata {
+        name = "ingress-webhook-test"
+      }
       spec {
         container {
           name    = "check"
@@ -193,12 +196,11 @@ resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
             EOC
           ]
         }
-
         restart_policy = "Never"
       }
     }
-
-    backoff_limit = 2
+    backoff_limit           = 4
+    active_deadline_seconds = 300
   }
 
   depends_on = [null_resource.wait_for_ingress_webhook]
