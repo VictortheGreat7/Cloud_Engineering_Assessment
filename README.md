@@ -1,22 +1,28 @@
 # Time API Infrastructure Project
 
-A cloud-native infrastructure project that deploys a simple Flask-based time API to Azure Kubernetes Service (AKS) with automated CI/CD and monitoring. There are two branches; [see `namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain) for use with a [name.com](https://www.name.com/) domain and [see `namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain) for use without a [name.com](https://www.name.com/) domain, Let's Encrypt TLS Certificate or Azure NSG port 80 restriction.
+A cloud-native infrastructure project that deploys a simple Flask-based time API to Azure Kubernetes Service (AKS) using automated Continuous Integration and Deployment (CI/CD) setups.
 
-This project is designed to demonstrate cloud engineering skills, including infrastructure as code (IaC), containerization, orchestration, and CI/CD automation.
+The repository contains three branches to support different deployment scenarios:
+
+- [see `namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain) for use with a [name.com](https://www.name.com/) domain,
+- [see `main` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/main) for use without a [name.com](https://www.name.com/) domain with a [Let's Encrypt](https://letsencrypt.org/) TLS Certificate or port 80 restricted at the Subnet level, and
+- [see `self-hosted` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/self-hosted) for a version of the [`main` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/main) that restricts access to the AKS API server to a private VNet and uses a self-hosted GitHub Actions runner (within the same VNet) when there is a need to access it during CI/CD, eliminating the need to expose the cluster publicly.
+
+This project is designed to demonstrate cloud engineering skills, including Infrastructure as Code (IaC), containerization, orchestration, and CI/CD automation.
 
 ## 🏗️ Architecture Overview
 
-This project demonstrates a deployment of a simple time API. It includes the use of the following:
+This project demonstrates a deployment of a simple API that returns the current UTC time. It includes the use of the following:
 
-- **Application**: Simple Flask API that returns current time
-- **Containerisation**: Docker for building and running the application
+- **Application**: Simple Flask API that returns current UTC time
+- **Containerisation**: Docker for building and test-running the application container
 - **Orchestration**: Kubernetes for container orchestration
-- **Cloud Infrastructure**: Azure Kubernetes Service (AKS) with networking, security, and monitoring
+- **Cloud Infrastructure**: Azure Kubernetes Service (AKS) with networking, security, and monitoring for compute needs
 - **CI/CD**: GitHub Actions for automated deployment
 - **Monitoring**: Microsoft Azure Monitor, Log Analytics, and Grafana dashboards
-- **Security**: GitHub Secrets, Security groups, Microsoft Azure RBAC and Network policies
-- **IaC/Scripting**: Terraform, Bash scripts, Microsoft Azure CLI and GitHub CLI
-- **SSL/TLS**: Automated certificate management with Let's Encrypt for Name.com domain ([see `namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
+- **Security**: GitHub Secrets, Security groups, Microsoft Azure Role Based Access Control, Network policies and isolating API Server access to a private VNet (when using the [`self-hosted` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/self-hosted))
+- **Infrastructure as Code**: The use of Terraform and Bash scripts running Microsoft Azure CLI and GitHub CLI commands for scripting/automation purposes
+- **SSL/TLS**: Automated TLS certificate issuance with Let's Encrypt for Name.com domain (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 
 ## 📋 Prerequisites
 
@@ -32,22 +38,22 @@ Before getting started, ensure you have installed and configured the following t
 
 ### Required Accounts & Services
 
-- **Microsoft Azure Account** with a student or paid subscription and appropriate permissions
+- **Microsoft Azure Account** with a student or paid subscription and appropriate permissions (an Owner role is preferable)
 - **Docker Hub Account** for container registry
 - **Domain Name** registered with [Name.com](https://name.com) for Name.com domain ([see `namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 - **GitHub Repository** for version control and CI/CD automation
 
 ### Required Permissions
 
-- Microsoft Azure subscription with `Owner` role
-- Permission to create Microsoft Azure AD groups and service principals
-- Domain management access at Name.com
+- Microsoft Azure subscription with `Owner` role is preferable
+- Permission to create and manage Microsoft Azure AD groups and service principals
+- Domain management access to a [name.com](https://www.name.com/) domain (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 
 ## 🚀 Quick Start
 
 ### 1. Fork and Clone the Repository
 
-Fork this repository to your GitHub account (to fork other branches, untick the copy only main branch option)and clone it to your local machine:
+Fork this repository to your GitHub account (to fork other branches too, untick the copy only main branch option) and clone it to your local machine:
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
@@ -60,9 +66,9 @@ Create a service principal for GitHub Actions:
 
 ```bash
 # Login to Microsoft Azure
-az login
+az login --use-device-code
 
-# Update the script's variables with your details before running
+# Update the service_principal.sh script variables with your details before running it. You can find it here:
 cd terraform/bash_scripts
 
 # Run the service principal creation script
@@ -97,13 +103,14 @@ chmod +x gh_secret.sh
 - `ARM_SUBSCRIPTION_ID`: Your Microsoft Azure subscription ID
 - `ARM_TENANT_ID`: Your Microsoft Azure tenant ID
 - `MY_USER_OBJECT_ID`: Your Microsoft Azure AD user object ID
-- `DOMAIN`: Your domain name (e.g., example.com) (when using the namecom_domain branch)
-- `DOMAIN_API_USERNAME`: Name.com API username (when using the namecom_domain branch)
-- `DOMAIN_API_TOKEN`: Name.com API token (when using the namecom_domain branch)
+- `RUNNER_TOKEN`: GitHub Actions runner token for the self-hosted runner (when using the [`self-hosted` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/self-hosted)). Find out how [`here`](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners). The cloud-init file already follows the instructions listed. All you need to do is copy the time-limited token to be run with ./config.sh in the configure step. Just make sure you select Linux x64 architecture ![Visual of Token Location](./screenshots/runner_token.png)
+- `DOMAIN`: Your domain name (e.g., example.com) (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
+- `DOMAIN_API_USERNAME`: Name.com API username (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
+- `DOMAIN_API_TOKEN`: Name.com API token (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 - `DOCKER_USERNAME`: Docker Hub username
 - `DOCKER_PASSWORD`: Docker Hub password/token
 
-**Note**: For the needed Azure values, check secrets.yaml created by the last step. You should be able to figure out the rest.
+**Note**: For the needed Microsoft Azure account details, check secrets.yaml created by the [Service Principal creation](#2-set-up-microsoft-azure-service-principal) step. Comment out any variables not needed for a particular scenario (branch).
 
 ### 4. Update Configuration
 
@@ -142,7 +149,7 @@ provider "azurerm" {
 }
 ```
 
-#### `terraform/microservices/deploy.tf` (when using the namecom_domain branch)
+#### `terraform/microservices/deploy.tf` (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 
 ```hcl
 # Update the domain name in the ingress configuration
@@ -152,7 +159,7 @@ rule {
 }
 ```
 
-#### `terraform/provision.tf` (when using the namecom_domain branch)
+#### `terraform/provision.tf` (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 
 ```hcl
 # Update email address for Let's Encrypt
@@ -170,7 +177,7 @@ EOT
 
 ### 5. Deploy Infrastructure
 
-Uncomment on-push trigger in .github/workflows/build.yaml
+Uncomment or add on-push trigger in .github/workflows/build.yaml
 
 ```yaml
 # on:
@@ -191,15 +198,20 @@ The workflow will:
 
 1. Build and test the Docker image
 2. Push the image to Docker Hub
-3. Provision Microsoft Azure infrastructure with Terraform
-4. Deploy the application to AKS
-5. Update DNS records on your Name.com domain if you have one (when using the namecom_domain branch)
+3. Provision part of Microsoft Azure infrastructure needed including the self-hosted runner with Terraform using a GitHub hosted Actions runner
+4. Provision the rest of the infrastructure using the self-hosted runner
+5. Deploy the application to AKS
+6. Update DNS records on your Name.com domain if you have one (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
+
+**Important**: You can only connect to the cluster in the [`self-hosted`](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/self-hosted) scenario from you self-hosted runner. There is also an ssh command in the outputs printed after a successful `terraform apply` that you can use to connect to the self-hosted runner for any sort of troubleshooting or the other.
 
 ## 🏗️ Manual Deployment (Alternative)
 
 If you prefer to deploy manually and you have updated the configuraton as specified above:
 
-### 1. Initialize Terraform Backend
+### Main Branch
+
+#### 1. Create or confirm existing Terraform Backend
 
 ```bash
 cd terraform/bash_scripts
@@ -207,20 +219,41 @@ chmod +x pre-apply.sh
 ./pre-apply.sh
 ```
 
-### 2. Deploy Infrastructure
+#### 2. Provision Infrastructure and Deploy Application
 
 ```bash
 cd ../
 terraform init
-terraform plan
 terraform apply
 ```
 
-### 3. Deploy Application (when using the namecom_domain branch)
+#### 3. Test API endpoint
+
+In the outputs printed after a successful `terraform apply`, you will see the ingress IP of the deployed API. You can test it using:
+
+```bash
+curl http://<your-ingress-ip>/time
+```
+
+or with just `http://<your-ingress-ip>/time` in your browser.
+
+### namecom_domain Branch
+
+#### 1. Create or Confirm [Backend](#1-create-or-confirm-existing-terraform-backend)
+
+#### 2. Provision Infrastructure
+
+```bash
+cd ../
+terraform init
+terraform apply
+```
+
+#### 3. Deploy Application
 
 ```bash
 # Move microservice configs
-cd microservices
+cd microservices/
 mv * ../
 cd ../
 
@@ -228,6 +261,54 @@ cd ../
 terraform init
 terraform apply
 ```
+
+#### 3. Test API URL
+
+```bash
+curl http://<your-configured-subdomain>/time
+```
+
+or with just `http://<your-configured-subdomain>/time` in your browser.
+
+### self-hosted Branch
+
+#### 1. Initialize [Terraform Backend](#1-create-or-confirm-existing-terraform-backend)
+
+#### 2. Provision Infrastructure and Self-Hosted Runner
+
+```bash
+cd ../
+terraform init
+terraform apply
+```
+
+#### 3. Deploy Application with Self-Hosted Runner
+
+```bash
+# Move microservice configs
+cd deploy/
+mv * ../
+cd ../
+
+# Create SSH keys for the self-hosted runner
+ssh-keygen -t rsa -b 4096 -C "github-selfhosted-runner" -f ssh_keys/id_rsa
+
+# Apply microservice deployment
+terraform init
+terraform apply
+```
+
+#### 4. Test API endpoint
+
+In the outputs printed after a successful `terraform apply`, you will see the ingress IP of the deployed API. You can test it using:
+
+```bash
+curl http://<your-ingress-ip>/time
+```
+
+or with just `http://<your-ingress-ip>/time` in your browser.
+
+**Important**: You can only [connect to the cluster](#useful-commands) in this scenario from you self-hosted runner. There is also an ssh command in the outputs printed after a successful `terraform apply` that you can use to connect to the self-hosted runner for any sort of troubleshooting or the other.
 
 ## 🔧 Local Application/Image Building and/or Testing
 
@@ -266,9 +347,9 @@ docker rm time-api-local
 The project includes comprehensive monitoring:
 
 - **Grafana Dashboard**: Visual monitoring interface
-- **Prometheus**: Metrics scraping and storage
-- **Microsoft Azure Monitor**: Metrics collection and alerting
-- **Microsoft Azure Log Analytics**: Centralized logging
+- **Prometheus**: Metrics scraping
+<!-- - **Microsoft Azure Monitor**: Metrics collection and alerting
+- **Microsoft Azure Log Analytics**: Centralized logging -->
 
 Access your Grafana dashboard through the Microsoft Azure portal after deployment.
 
@@ -280,9 +361,10 @@ Access your Grafana dashboard through the Microsoft Azure portal after deploymen
 - **GitHub Secrets**: Secure storage of sensitive information
 - **Service Principals**: Secure access for GitHub Actions
 - **Microsoft Azure RBAC**: Role-based access control
-- **SSL/TLS**: Automated certificate management (when using the namecom_domain branch)
+- **SSL/TLS**: Automated certificate management (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 - **Network Security Groups**: Microsoft Azure Network-level security
 - **Private Subnets**: Isolated network segments
+- **Private Cluster**: Restricted access to the Kubernetes API server
 
 ## 🛠️ Troubleshooting
 
@@ -331,20 +413,18 @@ kubectl run test-pod --image=busybox -it --rm -- /bin/sh
 
 ## 🧹 Cleanup
 
-To destroy all resources:
+To destroy all Terraform resources:
 
-### Using GitHub Actions
+**Using GitHub Actions**: Trigger the "Destroy Infrastructure" workflow manually from the GitHub Actions tab.
 
-Trigger the "Destroy Infrastructure" workflow manually from the GitHub Actions tab.
-
-### Manual Cleanup
+**Manual Cleanup**:
 
 ```bash
 cd terraform
-terraform destroy --auto-approve
+terraform destroy
 ```
 
-**Note**: This will permanently delete all Microsoft Azure resources created by this project.
+**Note**: This will permanently delete all Microsoft Azure resources created with `terraform apply`.
 
 ## 📝 Project Structure
 
@@ -386,12 +466,9 @@ terraform destroy --auto-approve
 │   └── destroy.yaml           # Resource cleanup workflow
 ├── terraform/               # Infrastructure as Code (IaC) and automation (Terraform modules, Bash scripts)
 │   ├── bash_scripts/          # Helper scripts
-│   │   ├── del_A_record.sh      # Script to delete A record from Name.com
-│   │   ├── get-aks-cred.sh      # Script to get AKS credentials
 │   │   ├── gh_secret.sh         # GitHub secrets management script
 │   │   ├── pre-apply.sh         # Pre-apply script for Terraform backend setup
-│   │   ├── service_principal.sh # Microsoft Azure service principal creation script
-│   │   └── up_A_record.sh      # Script to update A record in Name.com
+│   │   └── service_principal.sh # Microsoft Azure service principal creation script
 │   ├── microservices/         # Contains application deployment Terraform configuration files
 │   │   └── deploy.tf            # Time API deployment Terraform configuration file
 │   ├── backend.tf             # Terraform backend configuration
@@ -404,6 +481,41 @@ terraform destroy --auto-approve
 │   ├── permissions.tf         # Microsoft Azure RBAC permissions configuration
 │   ├── providers.tf           # Terraform provider configuration
 │   ├── provision.tf           # Kubernetes Clsuter provisioning file
+│   ├── terraform.tfvars.json  # Variable values (auto-generated in GitHub Actions runner from GitHub secrets)
+│   └── variables.tf           # Terraform variable definitions
+├── .gitignore               # Git ignore rules
+├── Dockerfile               # Container image definition
+├── get_time.py              # Flask application code
+└── README.md                # This file
+```
+
+### For the self-hosted branch
+
+```txt
+├── .github/workflows/       # GitHub Actions CI/CD
+│   ├── build.yaml             # Main deployment workflow
+│   ├── destroy.yaml           # Resource cleanup workflow
+│   └── integrate.yaml         # Subsequent infrastructure or deployment changes workflow
+├── terraform/               # Infrastructure as Code (IaC) and automation (Terraform modules, Bash scripts)
+│   ├── bash_scripts/          # Helper scripts
+│   │   ├── get-aks-cred.sh      # Script to get AKS credentials
+│   │   ├── gh_secret.sh         # GitHub secrets management script
+│   │   ├── pre-apply.sh         # Pre-apply script for Terraform backend setup
+│   │   └── service_principal.sh # Microsoft Azure service principal creation script
+│   ├── deploy/                # Contains application deployment Terraform configuration files
+│   │   ├── data.tf              # Data sources
+│   │   ├── deploy.tf            # Time API deployment Terraform configuration file
+│   │   ├── monitoring.tf        # Monitoring and observability configuration
+│   │   ├── netpolicy.tf         # Cluster Network policies configuration
+│   │   ├── permissions.tf       # Microsoft Azure RBAC permissions configuration
+│   │   └── provision.tf         # Kubernetes Cluster provisioning file
+│   ├── ssh_keys/              # An empty folder to store SSH keys needed for the self-hosted runner
+│   ├── backend.tf             # Terraform backend configuration
+│   ├── cloud-init.yaml.tpl    # Cloud-init template for self-hosted runner setup
+│   ├── main.tf                # Main Terraform entry point (K8S Cluster resource group and Self-Hosted GitHub Runner creation)
+│   ├── network.tf             # Microsoft Azure Cloud Networking configuration
+│   ├── outputs.tf             # Terraform output definitions
+│   ├── providers.tf           # Terraform provider configuration
 │   ├── terraform.tfvars.json  # Variable values (auto-generated in GitHub Actions runner from GitHub secrets)
 │   └── variables.tf           # Terraform variable definitions
 ├── .gitignore               # Git ignore rules
@@ -431,7 +543,7 @@ If you encounter issues:
 
 ## 🔗 Useful Links
 
-- [Name.com API Documentation](https://www.name.com/api-docs) (when using the namecom_domain branch)
+- [Name.com API Documentation](https://www.name.com/api-docs) (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 - [Microsoft Azure Documentation](https://docs.microsoft.com/en-us/azure/)
 - [Docker Documentation](https://docs.docker.com/)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
