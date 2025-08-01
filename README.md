@@ -3,6 +3,7 @@
 A cloud-native infrastructure project that deploys a simple Flask-based time API to Azure Kubernetes Service (AKS) using automated Continuous Integration and Deployment (CI/CD) setups.
 
 The repository contains three branches to support different deployment scenarios:
+
 - [see `namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain) for use with a [name.com](https://www.name.com/) domain,
 - [see `main` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/main) for use without a [name.com](https://www.name.com/) domain with a [Let's Encrypt](https://letsencrypt.org/) TLS Certificate or port 80 restricted at the Subnet level, and
 - [see `self-hosted` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/self-hosted) for a version of the [`main` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/main) that restricts access to the AKS API server to a private VNet and uses a self-hosted GitHub Actions runner (within the same VNet) when there is a need to access it during CI/CD, eliminating the need to expose the cluster publicly.
@@ -414,11 +415,9 @@ kubectl run test-pod --image=busybox -it --rm -- /bin/sh
 
 To destroy all Terraform resources:
 
-#### Using GitHub Actions
+**Using GitHub Actions**: Trigger the "Destroy Infrastructure" workflow manually from the GitHub Actions tab.
 
-Trigger the "Destroy Infrastructure" workflow manually from the GitHub Actions tab.
-
-#### Manual Cleanup
+**Manual Cleanup**:
 
 ```bash
 cd terraform
