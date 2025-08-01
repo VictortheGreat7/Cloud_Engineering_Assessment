@@ -9,6 +9,8 @@ CLIENT_ID=""
 CLIENT_SECRET=""
 SUBSCRIPTION_ID=""
 TENANT_ID=""
+GITHUB_RUNNER_TOKEN=""
+
 
 # Azure credentials as JSON
 AZURE_CREDENTIALS=$(cat <<EOF
@@ -29,6 +31,7 @@ declare -A secrets=(
   ["ARM_SUBSCRIPTION_ID"]="${SUBSCRIPTION_ID}"
   ["ARM_TENANT_ID"]="${TENANT_ID}"
   ["MY_USER_OBJECT_ID"]=""
+  ["RUNNER_TOKEN"]="${GITHUB_RUNNER_TOKEN}"
 )
 
 # Iterate over the secrets and set them using `gh secret set`

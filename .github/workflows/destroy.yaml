@@ -1,9 +1,6 @@
 name: Destroy Infrastructure
 
 on:
-  push:
-    branches:
-      - self-hosted
   workflow_dispatch:
 
 jobs:
