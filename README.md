@@ -1,6 +1,8 @@
-# Time API Infrastructure Project
+# World Clock Application - Cloud Infrastructure Project
 
-A cloud-native infrastructure project that deploys a simple Flask-based time API to Azure Kubernetes Service (AKS) using automated Continuous Integration and Deployment (CI/CD) setups.
+A cloud-native full-stack application featuring a beautiful planet-themed world clock dashboard. This project deploys a React frontend and Flask backend API to Azure Kubernetes Service (AKS) using automated Continuous Integration and Deployment (CI/CD).
+
+![World Clock Dashboard](https://github.com/user-attachments/assets/361393c2-8d13-44ac-8933-f56e0fd1dc4b)
 
 The repository contains three branches to support different deployment scenarios:
 
@@ -12,17 +14,53 @@ This project is designed to demonstrate cloud engineering skills, including Infr
 
 ## 🏗️ Architecture Overview
 
-This project demonstrates a deployment of a simple API that returns the current UTC time. It includes the use of the following:
+This project demonstrates a full-stack cloud-native application deployment with the following components:
 
-- **Application**: Simple Flask API that returns current UTC time
-- **Containerisation**: Docker for building and test-running the application container
-- **Orchestration**: Kubernetes for container orchestration
-- **Cloud Infrastructure**: Azure Kubernetes Service (AKS) with networking, security, and monitoring for compute needs
-- **CI/CD**: GitHub Actions for automated deployment
+### Application Stack
+- **Frontend**: React-based SPA with planet-themed UI, animated clocks, and responsive design
+  - Built with Vite for optimal performance
+  - Served via nginx in production
+  - Features real-time clock updates for 12+ major cities worldwide
+- **Backend**: Flask REST API providing timezone data
+  - Multiple endpoints: `/api/time`, `/api/timezones`, `/api/world-clocks`
+  - CORS-enabled for cross-origin requests
+  - Timezone support using pytz library
+
+### Infrastructure Components
+- **Containerization**: Multi-stage Docker builds for optimized images
+- **Orchestration**: Kubernetes for container orchestration and service discovery
+- **Cloud Infrastructure**: Azure Kubernetes Service (AKS) with networking, security, and monitoring
+- **CI/CD**: GitHub Actions for automated building, testing, and deployment
 - **Monitoring**: Microsoft Azure Monitor, Log Analytics, and Grafana dashboards
-- **Security**: GitHub Secrets, Security groups, Microsoft Azure Role Based Access Control, Network policies and isolating API Server access to a private VNet (when using the [`self-hosted` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/self-hosted))
-- **Infrastructure as Code**: The use of Terraform and Bash scripts running Microsoft Azure CLI and GitHub CLI commands for scripting/automation purposes
-- **SSL/TLS**: Automated TLS certificate issuance with Let's Encrypt for Name.com domain (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
+- **Security**: GitHub Secrets, Security groups, Microsoft Azure RBAC, Network policies
+- **Infrastructure as Code**: Terraform for declarative infrastructure management
+- **SSL/TLS**: Automated TLS certificate issuance with Let's Encrypt (namecom_domain branch)
+
+### Architecture Diagram
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Azure Cloud                              │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │                Azure Kubernetes Service (AKS)             │  │
+│  │                                                           │  │
+│  │  ┌──────────────┐        ┌──────────────────────────┐   │  │
+│  │  │   Ingress    │        │      Namespace: time-api │   │  │
+│  │  │  (nginx)     │        │                          │   │  │
+│  │  │              │        │  ┌────────────────────┐  │   │  │
+│  │  │  / → Frontend│───────▶│  │  Frontend Pods     │  │   │  │
+│  │  │              │        │  │  (nginx + React)   │  │   │  │
+│  │  │  /api/* →    │        │  │  Port: 80          │  │   │  │
+│  │  │    Backend   │───┐    │  └────────────────────┘  │   │  │
+│  │  └──────────────┘   │    │                          │   │  │
+│  │                     │    │  ┌────────────────────┐  │   │  │
+│  │                     └───▶│  │  Backend Pods      │  │   │  │
+│  │                          │  │  (Flask API)       │  │   │  │
+│  │                          │  │  Port: 5000        │  │   │  │
+│  │                          │  └────────────────────┘  │   │  │
+│  │                          └──────────────────────────┘   │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ## 📋 Prerequisites
 
@@ -30,11 +68,14 @@ Before getting started, ensure you have installed and configured the following t
 
 ### Required Tools
 
+- [Node.js](https://nodejs.org/) >= 18.x (for frontend development)
+- [Python](https://www.python.org/) >= 3.9 (for backend development)
 - [Microsoft Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) configured for GitHub Actions
 - [GitHub CLI](https://cli.github.com/) for secrets management
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.12.2
 - [kubelogin](https://azure.github.io/kubelogin/install.html)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) for Kubernetes management
+- [Docker](https://www.docker.com/) for building container images
 
 ### Required Accounts & Services
 
@@ -310,37 +351,126 @@ or with just `http://<your-ingress-ip>/time` in your browser.
 
 **Important**: You can only [connect to the cluster](#useful-commands) in this scenario from you self-hosted runner. There is also an ssh command in the outputs printed after a successful `terraform apply` that you can use to connect to the self-hosted runner for any sort of troubleshooting or the other.
 
-## 🔧 Local Application/Image Building and/or Testing
+## 🔧 Local Development
 
-### Running the Application Locally
+### Running with GitHub Codespaces
+
+This project includes a complete devcontainer configuration for GitHub Codespaces:
+
+1. Open the repository in GitHub Codespaces
+2. The environment will automatically install Node.js, Python, Docker, kubectl, and Terraform
+3. Dependencies will be installed automatically
+4. Ports 5000 (backend), 5173 (frontend dev), and 3000 (frontend prod) will be forwarded
+
+### Running the Backend API Locally
 
 ```bash
+# Navigate to backend directory
+cd backend
+
 # Install dependencies
-pip install Flask
+pip install -r requirements.txt
 
 # Run the application
-python get_time.py
+python app.py
 
-# Test the endpoint
-curl http://localhost:5000/time
+# The API will be available at http://localhost:5000
 ```
 
-### Building and Testing Docker Image
+#### Backend API Endpoints
+
+**GET /api/time**
+Get current time for a specific timezone
+```bash
+curl "http://localhost:5000/api/time?timezone=America/New_York"
+```
+
+**GET /api/timezones**
+List all available timezones grouped by region
+```bash
+curl http://localhost:5000/api/timezones
+```
+
+**GET /api/world-clocks**
+Get time for multiple major cities simultaneously
+```bash
+curl http://localhost:5000/api/world-clocks
+```
+
+**GET /health**
+Health check endpoint
+```bash
+curl http://localhost:5000/health
+```
+
+### Running the Frontend Locally
 
 ```bash
-# Build the image
-docker build -t time-api:local .
+# Navigate to frontend directory
+cd frontend
 
-# Run container
-docker run -d -p 5000:5000 --name time-api-local time-api:local
+# Install dependencies
+npm install
 
-# Test the endpoint
-curl http://localhost:5000/time
+# Run development server
+npm run dev
+
+# The app will be available at http://localhost:5173
+```
+
+#### Frontend Features
+
+- 🌍 Real-time clocks for 12+ major cities worldwide
+- 🎨 Planet-themed animated clock designs with orbital effects
+- 🌓 Day/night indicators for each city
+- 🔍 Search and filter cities
+- ⏰ Toggle between 12h/24h time formats
+- 📱 Fully responsive design
+- 🎭 Dark theme with vibrant accent colors
+
+### Building Docker Images
+
+#### Backend Image
+
+```bash
+cd backend
+docker build -t victorthegreat7/world-clock-backend:latest .
+
+# Test the container
+docker run -d -p 5000:5000 --name backend-test victorthegreat7/world-clock-backend:latest
+curl http://localhost:5000/api/world-clocks
 
 # Clean up
-docker stop time-api-local
-docker rm time-api-local
+docker stop backend-test && docker rm backend-test
 ```
+
+#### Frontend Image
+
+```bash
+cd frontend
+docker build -t victorthegreat7/world-clock-frontend:latest .
+
+# Test the container
+docker run -d -p 8080:80 --name frontend-test victorthegreat7/world-clock-frontend:latest
+# Open http://localhost:8080 in your browser
+
+# Clean up
+docker stop frontend-test && docker rm frontend-test
+```
+
+### Full Stack Local Testing
+
+Run both services together:
+
+```bash
+# Terminal 1 - Backend
+cd backend && python app.py
+
+# Terminal 2 - Frontend
+cd frontend && npm run dev
+```
+
+The frontend will automatically connect to the backend API at `http://localhost:5000`.
 
 ## 📊 Monitoring and Observability
 
@@ -431,30 +561,55 @@ terraform destroy
 ### For the main branch
 
 ```txt
+├── .devcontainer/           # GitHub Codespaces configuration
+│   ├── devcontainer.json      # Dev container configuration
+│   └── setup.sh               # Environment setup script
 ├── .github/workflows/       # GitHub Actions CI/CD
 │   ├── build.yaml             # Main deployment workflow
 │   └── destroy.yaml           # Resource cleanup workflow
-├── terraform/               # Infrastructure as Code (IaC) and automation (Terraform modules, Bash scripts)
+├── backend/                 # Backend Flask API
+│   ├── app.py                 # Main Flask application with API endpoints
+│   ├── requirements.txt       # Python dependencies
+│   └── Dockerfile             # Backend container image definition
+├── frontend/                # Frontend React application
+│   ├── src/                   # Source code
+│   │   ├── components/          # React components
+│   │   │   ├── Dashboard.jsx      # Main dashboard component
+│   │   │   ├── Dashboard.css      # Dashboard styles
+│   │   │   ├── CityCard.jsx       # City clock card component
+│   │   │   ├── CityCard.css       # City card styles
+│   │   │   ├── ClockOrbit.jsx     # Animated clock component
+│   │   │   └── ClockOrbit.css     # Clock animation styles
+│   │   ├── App.jsx              # Main App component
+│   │   ├── App.css              # App styles
+│   │   ├── index.css            # Global styles
+│   │   └── main.jsx             # Entry point
+│   ├── public/                # Static assets
+│   ├── package.json           # Node.js dependencies
+│   ├── vite.config.js         # Vite configuration
+│   ├── nginx.conf             # Nginx configuration for production
+│   └── Dockerfile             # Frontend container image definition
+├── terraform/               # Infrastructure as Code (IaC)
 │   ├── bash_scripts/          # Helper scripts
 │   │   ├── gh_secret.sh         # GitHub secrets management script
 │   │   ├── pre-apply.sh         # Pre-apply script for Terraform backend setup
 │   │   └── service_principal.sh # Microsoft Azure service principal creation script
 │   ├── backend.tf             # Terraform backend configuration
 │   ├── data.tf                # Data sources for existing resources
-│   ├── deploy.tf              # Time API deployment Terraform configuration file
-│   ├── main.tf                # Main Terraform entry point (K8S Cluster resource creation)
+│   ├── deploy.tf              # Application deployment (frontend + backend)
+│   ├── main.tf                # Main Terraform entry point (K8S Cluster)
 │   ├── monitoring.tf          # Monitoring and observability configuration
 │   ├── netpolicy.tf           # Cluster Network policies configuration
 │   ├── network.tf             # Microsoft Azure Cloud Networking configuration
 │   ├── outputs.tf             # Terraform output definitions
 │   ├── permissions.tf         # Microsoft Azure RBAC permissions configuration
 │   ├── providers.tf           # Terraform provider configuration
-│   ├── provision.tf           # Kubernetes Clsuter provisioning file
-│   ├── terraform.tfvars.json  # Variable values (auto-generated in GitHub Actions runner from GitHub secrets)
+│   ├── provision.tf           # Kubernetes cluster provisioning file
+│   ├── terraform.tfvars.json  # Variable values (auto-generated from GitHub secrets)
 │   └── variables.tf           # Terraform variable definitions
 ├── .gitignore               # Git ignore rules
-├── Dockerfile               # Container image definition
-├── get_time.py              # Flask application code
+├── Dockerfile               # Legacy Dockerfile (kept for compatibility)
+├── get_time.py              # Legacy Flask app (kept for compatibility)
 └── README.md                # This file
 ```
 
