@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import CityCard from './CityCard';
 import './Dashboard.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// In production, the API is behind the same ingress at /api
+// In development, use localhost:5000
+const API_URL = import.meta.env.VITE_API_URL || (
+  import.meta.env.DEV ? 'http://localhost:5000' : ''
+);
 
 function Dashboard() {
   const [cities, setCities] = useState([]);
