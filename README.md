@@ -487,14 +487,39 @@ Access your Grafana dashboard through the Microsoft Azure portal after deploymen
 
 ## 🔒 Security Features
 
-- **Network Policies**: Restrict communication to an as-needed basis
+### Network Policies
+The application uses comprehensive Kubernetes Network Policies to enforce zero-trust security:
+
+- **Default Deny**: All ingress and egress traffic is denied by default for both backend and frontend pods
+- **Selective Allow Rules**:
+  - Backend pods (port 5000): Accept traffic only from nginx ingress controller and load test jobs
+  - Frontend pods (port 80): Accept traffic only from nginx ingress controller and load test jobs
+  - DNS access: Both services can resolve DNS queries to kube-system namespace
+- **Namespace Isolation**: Policies are scoped to the `time-api` namespace
+- **Label-based Selection**: Uses `app=world-clock-backend` and `app=world-clock-frontend` labels
+
+To view active network policies:
+```bash
+kubectl get networkpolicies -n time-api
+kubectl describe networkpolicy <policy-name> -n time-api
+```
+
+### Self-Hosted Runner Support
+This architecture is compatible with self-hosted GitHub Actions runners for enhanced security:
+- Can be deployed to private AKS clusters (API server not publicly accessible)
+- Self-hosted runner can be deployed in the same VNet for secure cluster access
+- Network policies ensure pods only accept traffic from authorized sources
+- See the [`self-hosted` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/self-hosted) for implementation details
+
+### Additional Security Features
 - **GitHub Secrets**: Secure storage of sensitive information
 - **Service Principals**: Secure access for GitHub Actions
 - **Microsoft Azure RBAC**: Role-based access control
 - **SSL/TLS**: Automated certificate management (when using the [`namecom_domain` branch](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/tree/namecom_domain))
 - **Network Security Groups**: Microsoft Azure Network-level security
 - **Private Subnets**: Isolated network segments
-- **Private Cluster**: Restricted access to the Kubernetes API server
+- **Multi-stage Docker builds**: Minimize attack surface
+- **Container resource limits**: Prevent resource exhaustion attacks
 
 ## 🛠️ Troubleshooting
 
