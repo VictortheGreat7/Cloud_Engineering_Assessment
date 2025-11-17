@@ -1,6 +1,12 @@
 name: Provision Infrastructure and Deploy API
 
-# This workflow will run on pushes to the main branch and manual triggers
+# This workflow supports both public and private cluster deployments
+# For private clusters with self-hosted runners:
+#   1. Uncomment private_cluster_enabled in terraform/main.tf
+#   2. Uncomment resources in terraform/self-hosted-runner.tf
+#   3. Change 'deploy' job to use: runs-on: [self-hosted, linux, x64]
+#   4. Add RUNNER_TOKEN to GitHub secrets
+
 on:
   # push:
   #   branches:
@@ -8,8 +14,12 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Build and push Docker images (always uses GitHub-hosted runner)
   build:
     runs-on: ubuntu-latest
+    
+    outputs:
+      image_tag: ${{ github.sha }}
 
     steps:
 
@@ -68,7 +78,17 @@ jobs:
         docker push victorthegreat7/world-clock-frontend:${{ github.sha }}
         docker push victorthegreat7/world-clock-frontend:latest
 
-    # Provision cloud infrastructure and deploy microservice to provisioned infrastructure
+  # Deploy infrastructure and application
+  # For private cluster: Change to runs-on: [self-hosted, linux, x64]
+  # For public cluster: Keep as runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest  # Change to [self-hosted, linux, x64] for private cluster
+    needs: build
+    
+    steps:
+    - name: Checkout current Github repository
+      uses: actions/checkout@v4
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
@@ -83,7 +103,6 @@ jobs:
         ./pre-apply.sh
       working-directory: ./terraform/bash_scripts
 
-    # Deploy microservice to provisioned infrastructure
     - name: Initialize and validate Terraform configuration
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}

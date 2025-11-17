@@ -1,6 +1,32 @@
 # Self-Hosted GitHub Actions Runner Infrastructure
-# This file contains resources for deploying a self-hosted runner for private cluster access
-# Uncomment these resources when deploying to a private AKS cluster
+# 
+# PURPOSE: This file contains Terraform resources for deploying a self-hosted GitHub Actions runner
+#          VM that can access a private AKS cluster within the same VNet.
+#
+# WHY COMMENTED OUT: 
+#   - The resources are commented out by default to allow testing with public clusters first
+#   - Enabling these resources requires additional setup (SSH keys, runner token, etc.)
+#   - This allows users to deploy and test the application before adding private cluster security
+#   - When ready for production with private cluster, simply uncomment and deploy
+#
+# TO ENABLE:
+#   1. Generate SSH keys: ssh-keygen -t rsa -b 4096 -f terraform/ssh_keys/id_rsa
+#   2. Copy cloud-init-template.yaml to cloud-init.yaml.tpl
+#   3. Add RUNNER_TOKEN to GitHub secrets
+#   4. Uncomment all resources below (remove /* and */)
+#   5. Uncomment private_cluster_enabled in main.tf
+#   6. Update .github/workflows/build.yaml deploy job to use self-hosted runner
+#   7. Run: terraform apply
+#
+# WHAT IT CREATES:
+#   - Dedicated subnet for runner VM (10.0.3.0/24)
+#   - Network Security Group with SSH/HTTPS rules
+#   - Public IP for external SSH access
+#   - Ubuntu VM with cloud-init automation
+#   - Managed identity for Azure access
+#   - Outputs for SSH command and IP address
+#
+# See SELF_HOSTED_RUNNER_GUIDE.md for detailed setup instructions
 
 /*
 # Subnet for self-hosted runner VM
