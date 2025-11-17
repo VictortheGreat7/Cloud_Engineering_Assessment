@@ -1,0 +1,94 @@
+#cloud-config
+# Cloud-init template for self-hosted GitHub Actions runner
+# This configures a VM to act as a self-hosted runner with access to private AKS cluster
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - wget
+  - git
+  - jq
+  - docker.io
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+  - lsb-release
+
+runcmd:
+  # Install Azure CLI
+  - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+  # Install kubectl
+  - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  - rm kubectl
+
+  # Install kubelogin
+  - wget https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-linux-amd64.zip
+  - unzip kubelogin-linux-amd64.zip
+  - mv bin/linux_amd64/kubelogin /usr/local/bin/
+  - rm -rf bin kubelogin-linux-amd64.zip
+
+  # Add runner user to docker group
+  - usermod -aG docker adminuser
+
+  # Create actions-runner directory
+  - mkdir -p /home/adminuser/actions-runner
+  - cd /home/adminuser/actions-runner
+
+  # Download and extract GitHub Actions runner
+  - RUNNER_VERSION=$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r '.tag_name' | sed 's/v//')
+  - curl -o actions-runner-linux-x64.tar.gz -L "https://github.com/actions/runner/releases/download/v$${RUNNER_VERSION}/actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
+  - tar xzf actions-runner-linux-x64.tar.gz
+  - rm actions-runner-linux-x64.tar.gz
+  - chown -R adminuser:adminuser /home/adminuser/actions-runner
+
+  # Configure runner (requires RUNNER_TOKEN to be provided)
+  # Note: The configuration step requires manual intervention or GitHub API automation
+  # For manual setup: sudo -u adminuser ./config.sh --url https://github.com/YOUR-ORG/YOUR-REPO --token ${runner_token}
+  # Then: sudo ./svc.sh install adminuser && sudo ./svc.sh start
+
+write_files:
+  - path: /home/adminuser/configure-runner.sh
+    owner: adminuser:adminuser
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      # Runner configuration script
+      # Usage: ./configure-runner.sh <GITHUB_REPO_URL> <RUNNER_TOKEN>
+      
+      cd /home/adminuser/actions-runner
+      
+      # Configure the runner
+      ./config.sh --url "$1" --token "$2" --name "aks-private-runner" --work _work --labels self-hosted,linux,x64,aks-private
+      
+      # Install and start the service
+      sudo ./svc.sh install adminuser
+      sudo ./svc.sh start
+      
+      echo "Runner configured and started successfully"
+
+  - path: /home/adminuser/setup-kubectl.sh
+    owner: adminuser:adminuser
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      # Script to configure kubectl access to private AKS cluster
+      # Run this after runner is configured
+      
+      # Login to Azure (requires manual az login or managed identity)
+      echo "Please run: az login"
+      echo "Then run: az aks get-credentials --resource-group <RG_NAME> --name <CLUSTER_NAME>"
+      echo "Then run: kubelogin convert-kubeconfig -l azurecli"
+
+final_message: |
+  GitHub Actions Runner VM is ready!
+  
+  To complete the setup:
+  1. SSH into the VM
+  2. Run: /home/adminuser/configure-runner.sh <YOUR_GITHUB_REPO_URL> <RUNNER_TOKEN>
+  3. Run: /home/adminuser/setup-kubectl.sh and follow the instructions
+  
+  The runner will then be available for GitHub Actions workflows with label 'self-hosted'

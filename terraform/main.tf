@@ -16,6 +16,12 @@ resource "azurerm_kubernetes_cluster" "time_api_cluster" {
   kubernetes_version  = data.azurerm_kubernetes_service_versions.current.default_version
   node_resource_group = "nrg-aks-${azurerm_resource_group.time_api_rg.name}-cluster"
 
+  # Private cluster configuration for enhanced security
+  # Uncomment the following lines to enable private cluster (requires self-hosted runner)
+  # private_cluster_enabled             = true
+  # private_dns_zone_id                 = "System"
+  # private_cluster_public_fqdn_enabled = false
+
   default_node_pool {
     name                 = "default"
     vm_size              = "Standard_D2_v2"

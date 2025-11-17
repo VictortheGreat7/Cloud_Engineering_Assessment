@@ -1,0 +1,140 @@
+name: Provision Infrastructure and Deploy API (Self-Hosted Runner Support)
+
+# This workflow demonstrates how to use self-hosted runners for private cluster deployments
+# To use this workflow:
+# 1. Rename to build.yaml
+# 2. Uncomment private_cluster_enabled in terraform/main.tf
+# 3. Uncomment self-hosted runner resources in terraform/self-hosted-runner.tf
+# 4. Deploy infrastructure first with GitHub-hosted runner
+# 5. Configure self-hosted runner on the VM
+# 6. Update this workflow to use self-hosted runner for kubectl operations
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # Build and push Docker images using GitHub-hosted runners
+  build-images:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout current Github repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # Backend image
+    - name: Build backend Docker image
+      run: |
+        docker build -t world-clock-backend:${{ github.sha }} -t world-clock-backend:latest .
+      working-directory: ./backend
+
+    - name: Test backend container
+      run: |
+        docker run -d -p 5000:5000 --name backend-test world-clock-backend:${{ github.sha }}
+        sleep 5
+        curl --fail http://localhost:5000/health || (docker logs backend-test && exit 1)
+        curl --fail http://localhost:5000/api/world-clocks || (docker logs backend-test && exit 1)
+        docker stop backend-test
+
+    - name: Push backend Docker image
+      run: |
+        docker tag world-clock-backend:${{ github.sha }} victorthegreat7/world-clock-backend:${{ github.sha }}
+        docker tag world-clock-backend:${{ github.sha }} victorthegreat7/world-clock-backend:latest
+        docker push victorthegreat7/world-clock-backend:${{ github.sha }}
+        docker push victorthegreat7/world-clock-backend:latest
+
+    # Frontend image
+    - name: Build frontend Docker image
+      run: |
+        docker build -t world-clock-frontend:${{ github.sha }} -t world-clock-frontend:latest .
+      working-directory: ./frontend
+
+    - name: Test frontend container
+      run: |
+        docker run -d -p 8080:80 --name frontend-test world-clock-frontend:${{ github.sha }}
+        sleep 5
+        curl --fail http://localhost:8080/health || (docker logs frontend-test && exit 1)
+        docker stop frontend-test
+
+    - name: Push frontend Docker image
+      run: |
+        docker tag world-clock-frontend:${{ github.sha }} victorthegreat7/world-clock-frontend:${{ github.sha }}
+        docker tag world-clock-frontend:${{ github.sha }} victorthegreat7/world-clock-frontend:latest
+        docker push victorthegreat7/world-clock-frontend:${{ github.sha }}
+        docker push victorthegreat7/world-clock-frontend:latest
+
+  # Deploy infrastructure using self-hosted runner (for private cluster access)
+  deploy-infrastructure:
+    # Use self-hosted runner that has access to private VNet
+    # Change to: runs-on: self-hosted
+    # Or use labels: runs-on: [self-hosted, linux, x64, aks-private]
+    runs-on: ubuntu-latest  # Change this when private cluster is enabled
+    needs: build-images
+    
+    steps:
+    - name: Checkout current Github repository
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Confirm/create Terraform Backend
+      run: |
+        chmod +x pre-apply.sh
+        ./pre-apply.sh
+      working-directory: ./terraform/bash_scripts
+
+    - name: Initialize and validate Terraform configuration
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init && terraform validate
+      working-directory: ./terraform
+
+    - name: Apply Terraform configuration
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
+      run: |
+        cat <<EOF > terraform.tfvars.json
+        {
+          "my_user_object_id": "$USER_OBJECT_ID"
+        }
+        EOF
+
+        terraform apply --auto-approve
+      working-directory: ./terraform
+
+    # For private clusters, kubectl commands must run from within the VNet
+    # This step would only work with self-hosted runner in the same VNet
+    - name: Configure kubectl (requires VNet access for private cluster)
+      run: |
+        az aks get-credentials --resource-group $(terraform output -raw resource_group_name) --name $(terraform output -raw cluster_name) --overwrite-existing
+        kubelogin convert-kubeconfig -l azurecli
+      working-directory: ./terraform
+      continue-on-error: true  # Remove this when using self-hosted runner
+
+    - name: Verify deployment
+      run: |
+        kubectl get pods -n time-api
+        kubectl get services -n time-api
+        kubectl get ingress -n time-api
+      continue-on-error: true  # Remove this when using self-hosted runner
