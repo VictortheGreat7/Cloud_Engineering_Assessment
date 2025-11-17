@@ -1,22 +1,52 @@
 name: Provision Infrastructure and Deploy API
 
-# This workflow supports both public and private cluster deployments
-# For private clusters with self-hosted runners:
-#   1. Uncomment private_cluster_enabled in terraform/main.tf
-#   2. Uncomment resources in terraform/self-hosted-runner.tf
-#   3. Change 'deploy' job to use: runs-on: [self-hosted, linux, x64]
-#   4. Add RUNNER_TOKEN to GitHub secrets
+# This workflow has clear separation between:
+# 1. Infrastructure provisioning (AKS cluster, VNet, etc.) - runs once or rarely
+# 2. Runner infrastructure (optional, for private clusters) - runs once if needed
+# 3. Application deployment (backend + frontend) - runs frequently
+
+# Workflow stages:
+# - build: Build and push Docker images (GitHub-hosted runner)
+# - provision-infra: Create AKS cluster and base infrastructure (GitHub-hosted runner)
+# - provision-runner: Create self-hosted runner VM (optional, GitHub-hosted runner)
+# - deploy-app: Deploy application to cluster (GitHub-hosted OR self-hosted runner)
 
 on:
   # push:
   #   branches:
   #     - main
   workflow_dispatch:
+    inputs:
+      provision_infrastructure:
+        description: 'Provision base infrastructure (AKS, VNet, etc.)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      provision_runner:
+        description: 'Provision self-hosted runner VM (for private cluster)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      deploy_application:
+        description: 'Deploy application to cluster'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
-  # Build and push Docker images (always uses GitHub-hosted runner)
+  # Job 1: Build and push Docker images (always uses GitHub-hosted runner)
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.deploy_application != 'false' }}
     
     outputs:
       image_tag: ${{ github.sha }}
@@ -78,12 +108,12 @@ jobs:
         docker push victorthegreat7/world-clock-frontend:${{ github.sha }}
         docker push victorthegreat7/world-clock-frontend:latest
 
-  # Deploy infrastructure and application
-  # For private cluster: Change to runs-on: [self-hosted, linux, x64]
-  # For public cluster: Keep as runs-on: ubuntu-latest
-  deploy:
-    runs-on: ubuntu-latest  # Change to [self-hosted, linux, x64] for private cluster
-    needs: build
+  # Job 2: Provision base infrastructure (AKS cluster, VNet, etc.)
+  # Runs on GitHub-hosted runner
+  # Only runs when explicitly requested
+  provision-infra:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.provision_infrastructure == 'true' }}
     
     steps:
     - name: Checkout current Github repository
@@ -112,7 +142,7 @@ jobs:
       run: terraform init && terraform validate
       working-directory: ./terraform
 
-    - name: Apply Terraform configuration
+    - name: Apply base infrastructure (AKS, VNet, etc.)
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -126,5 +156,140 @@ jobs:
         }
         EOF
 
+        terraform apply --auto-approve -target=azurerm_resource_group.time_api_rg \
+          -target=azurerm_kubernetes_cluster.time_api_cluster \
+          -target=azurerm_virtual_network.time_api_vnet \
+          -target=azurerm_subnet.time_api_subnet \
+          -target=module.nginx_ingress
+      working-directory: ./terraform
+
+    outputs:
+      resource_group_name:
+        description: 'Resource group name for runner infrastructure'
+        value: ${{ steps.terraform_outputs.outputs.resource_group_name }}
+
+  # Job 3: Provision self-hosted runner VM (optional, for private clusters)
+  # Runs on GitHub-hosted runner
+  # Only runs when explicitly requested
+  provision-runner:
+    runs-on: ubuntu-latest
+    needs: provision-infra
+    if: ${{ github.event.inputs.provision_runner == 'true' }}
+    
+    steps:
+    - name: Checkout current Github repository
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Initialize Terraform for runner infrastructure
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init
+      working-directory: ./terraform/runner-infra
+
+    - name: Deploy runner infrastructure
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
+      run: |
+        # Get outputs from main infrastructure
+        cd ../
+        RG_NAME=$(terraform output -raw resource_group_name)
+        VNET_NAME=$(terraform output -raw vnet_name)
+        
+        cd runner-infra/
+        
+        cat <<EOF > terraform.tfvars.json
+        {
+          "resource_group_name": "$RG_NAME",
+          "vnet_name": "$VNET_NAME",
+          "runner_token": "$RUNNER_TOKEN"
+        }
+        EOF
+
         terraform apply --auto-approve
+      working-directory: ./terraform/runner-infra
+
+  # Job 4: Deploy application to cluster
+  # For private cluster: Change to runs-on: [self-hosted, linux, x64]
+  # For public cluster: Keep as runs-on: ubuntu-latest
+  deploy-app:
+    runs-on: ubuntu-latest  # Change to [self-hosted, linux, x64] for private cluster
+    needs: [build, provision-infra]
+    if: |
+      always() && 
+      needs.build.result == 'success' &&
+      (needs.provision-infra.result == 'success' || needs.provision-infra.result == 'skipped') &&
+      github.event.inputs.deploy_application != 'false'
+    
+    steps:
+    - name: Checkout current Github repository
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Confirm/create Terraform Backend
+      run: |
+        chmod +x pre-apply.sh
+        ./pre-apply.sh
+      working-directory: ./terraform/bash_scripts
+
+    - name: Initialize Terraform
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      run: terraform init
+      working-directory: ./terraform
+
+    - name: Deploy application to cluster
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        USER_OBJECT_ID: ${{ secrets.MY_USER_OBJECT_ID }}
+      run: |
+        cat <<EOF > terraform.tfvars.json
+        {
+          "my_user_object_id": "$USER_OBJECT_ID"
+        }
+        EOF
+
+        # Apply only application deployment resources
+        terraform apply --auto-approve \
+          -target=kubernetes_namespace_v1.time_api \
+          -target=kubernetes_deployment_v1.world_clock_backend \
+          -target=kubernetes_deployment_v1.world_clock_frontend \
+          -target=kubernetes_service_v1.world_clock_backend \
+          -target=kubernetes_service_v1.world_clock_frontend \
+          -target=kubernetes_ingress_v1.world_clock_ingress \
+          -target=kubernetes_network_policy_v1.backend_default_deny_all \
+          -target=kubernetes_network_policy_v1.frontend_default_deny_all \
+          -target=kubernetes_network_policy_v1.backend_allow_dns_access \
+          -target=kubernetes_network_policy_v1.frontend_allow_dns_access \
+          -target=kubernetes_network_policy_v1.allow_ingress_to_backend \
+          -target=kubernetes_network_policy_v1.allow_ingress_to_frontend \
+          -target=kubernetes_job_v1.backend_loadtest \
+          -target=kubernetes_job_v1.frontend_loadtest
       working-directory: ./terraform
