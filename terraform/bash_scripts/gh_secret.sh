@@ -32,6 +32,11 @@ declare -A secrets=(
   ["ARM_TENANT_ID"]="${TENANT_ID}"
   ["MY_USER_OBJECT_ID"]=""
   ["RUNNER_TOKEN"]="${GITHUB_RUNNER_TOKEN}"
+  ["DOMAIN"]=""
+  ["DOMAIN_API_USERNAME"]=""
+  ["DOMAIN_API_TOKEN"]=""
+  ["DOCKER_USERNAME"]=""
+  ["DOCKER_PASSWORD"]=""
 )
 
 # Iterate over the secrets and set them using `gh secret set`
